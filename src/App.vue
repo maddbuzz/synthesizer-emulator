@@ -1,44 +1,27 @@
-<!-- ???.vue -->
-<!-- Top level bindigs are pre-processed via "setup" -->
-<script setup>
-import { useMachine } from 'xstate-vue2';
-import synthesizerMachine from './nucleotides-synthesizer-machine';
-
-const { state, send } = useMachine(synthesizerMachine);
-</script>
-
 <template>
   <div id="app">
-    <div>states = {{state.value}}</div>
-    <button @click="send('ADD_NEW_TASK')">Add task</button>
-    <div>nextTaskID = {{state.context.nextTaskID}}</div>
-    <div>{{state.context.currentTask}}</div>
-    <div>tasksCompletedInRow = {{state.context.tasksCompletedInRow}}</div>
-    <div>{{state.context.queue}}</div>
-    <div>{{state.context.completedTasks}}</div>
+    <header>
+      <img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="125" height="125" />
+
+      <div class="wrapper">
+        <nav>
+          <router-link to="/">Synthesizer </router-link>
+          <router-link to="/about"> About</router-link>
+        </nav>
+      </div>
+    </header>
+
+    <router-view />
   </div>
 </template>
 
-<!-- <script>
-import { useMachine } from 'xstate-vue2';
-import synthesizerMachine from './nucleotides-synthesizer-machine.js';
+<script>
 
 export default {
-  name: "App",
-  setup() {
-    const { state, send } = useMachine(synthesizerMachine);
-    return { state, send };
-  }
-};
-</script> -->
+  name: 'App',
 
-<style>
-#app {
-  font-family: "Avenir", Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
-}
-</style>
+  data: () => ({
+    //
+  }),
+};
+</script>
