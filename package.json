@@ -11,7 +11,9 @@
     "core-js": "^3.8.3",
     "vue": "^2.6.14",
     "vue-router": "^3.5.1",
-    "vuetify": "^2.6.0"
+    "vuetify": "^2.6.0",
+    "xstate": "^4.38.0",
+    "xstate-vue2": "^0.3.2"
   },
   "devDependencies": {
     "@babel/core": "^7.12.16",
@@ -43,7 +45,10 @@
     "parserOptions": {
       "parser": "@babel/eslint-parser"
     },
-    "rules": {}
+    "rules": {
+      "no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
+      "no-console": "off"
+    }
   },
   "browserslist": [
     "> 1%",
