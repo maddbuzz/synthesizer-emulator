@@ -7,11 +7,11 @@ const { state, send } = useMachine(synthesizerMachine);
 
 <template>
   <div>
-    <div>states = {{state.value}}</div>
+    <div>States = {{state.value}}</div>
     <button @click="send('ADD_NEW_TASK')">Add task</button>
-    <div>nextTaskID = {{state.context.nextTaskID}}</div>
+    <div>nextTaskID = {{state.context.tasksParams.nextTaskID}}</div>
     <div>{{state.context.currentTask}}</div>
-    <div>tasksCompletedInRow = {{state.context.tasksCompletedInRow}}</div>
+    <div>tasksCompletedInRow = {{state.context.tasksParams.tasksCompletedInRow}}</div>
     <div>{{state.context.queue}}</div>
     <div>{{state.context.completedTasks}}</div>
   </div>
