@@ -1,7 +1,12 @@
 import Vue from 'vue';
 import VueRouter from 'vue-router';
 // import HomeView from '../views/HomeView.vue';
+
+import { useMachine } from 'xstate-vue2';
 import SynthesizerView from '../views/SynthesizerView.vue';
+import synthesizerMachine from '../nucleotides-synthesizer-machine';
+
+const { state, send } = useMachine(synthesizerMachine);
 
 Vue.use(VueRouter);
 
@@ -15,6 +20,11 @@ const routes = [
     path: '/',
     name: 'synthesizer',
     component: SynthesizerView,
+    props: { state, send },
+    // props: (_route) => {
+    //   const { state, send } = useMachine(synthesizerMachine);
+    //   return { state, send };
+    // },
   },
   {
     path: '/about',

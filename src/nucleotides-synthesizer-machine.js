@@ -23,12 +23,8 @@ const synthesizerMachine = createMachine({
     queue: [],
     currentTask: {},
     completedTasks: [],
-    // nextTaskID: 1,
-    // tasksCompletedInRow: 0,
-    tasksParams: {
-      nextTaskID: 1,
-      tasksCompletedInRow: 0,
-    },
+    nextTaskID: 1,
+    tasksCompletedInRow: 0,
   },
 
   states: {
@@ -51,12 +47,13 @@ const synthesizerMachine = createMachine({
               },
             },
             elementSynthesis: {
+              entry: 'decrementElementsLeft',
               after: {
                 1000: [
                   {
                     target: '#nucleotidesSynthesizer.synthesizer.busy.elementSynthesis',
                     cond: 'elementsLeft',
-                    actions: ['decrementElementsLeft'],
+                    actions: [],
                     internal: false,
                   },
                   {
@@ -143,7 +140,7 @@ const synthesizerMachine = createMachine({
   guards: {
     queueNotEmpty: (context, _event) => (context.queue.length !== 0),
     elementsLeft: ({ currentTask }) => (currentTask.elementsLeft !== 0),
-    manyTasksCompletedInRow: ({ tasksParams }) => (tasksParams.tasksCompletedInRow >= 5),
+    manyTasksCompletedInRow: ({ tasksCompletedInRow }) => (tasksCompletedInRow >= 5),
     // TODO:
     taskPending: () => false,
   },
@@ -168,28 +165,23 @@ const synthesizerMachine = createMachine({
 
     moveToCompleted: assign((context) => {
       const {
-        queue, currentTask, completedTasks, tasksParams,
+        queue, currentTask, completedTasks,
       } = context;
       const index = queue.indexOf(currentTask);
       if (index === -1) throw Error("moveToCompleted: can't find currentTask!");
       currentTask.status = 'completed';
-      tasksParams.tasksCompletedInRow += 1;
+      context.tasksCompletedInRow += 1;
       completedTasks.push(currentTask);
       context.currentTask = {};
       queue.splice(index, 1);
       return context;
     }),
 
-    resetTasksCompletedInRow: assign({
-      tasksParams: ({ tasksParams }) => {
-        tasksParams.tasksCompletedInRow = 0;
-        return tasksParams;
-      },
-    }),
+    resetTasksCompletedInRow: assign({ tasksCompletedInRow: 0 }),
 
     pushTask: assign({
       queue: (context) => {
-        const { queue, tasksParams: { nextTaskID } } = context;
+        const { queue, nextTaskID } = context;
         const defaultTask = {
           id: nextTaskID, status: 'pending', priority: 2, sequence: '', length: 0,
         };
@@ -198,10 +190,7 @@ const synthesizerMachine = createMachine({
         queue.push(newTask);
         return queue;
       },
-      tasksParams: ({ tasksParams }) => {
-        tasksParams.nextTaskID += 1;
-        return tasksParams;
-      },
+      nextTaskID: ({ nextTaskID }) => nextTaskID + 1,
     }),
 
     sortTasks: assign({
