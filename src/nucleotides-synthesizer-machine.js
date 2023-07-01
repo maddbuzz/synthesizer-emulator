@@ -165,8 +165,8 @@ const synthesizerMachine = createMachine({
   },
 }, {
   guards: {
-    queueNotEmpty: (context, _event) => (context.queue.length !== 0),
-    elementsLeft: ({ currentTask }) => (currentTask.elementsLeft !== 0),
+    queueNotEmpty: (context, _event) => (!!context.queue.length),
+    elementsLeft: ({ currentTask }) => (!!currentTask.elementsLeft),
     manyTasksCompletedInRow: ({ tasksCompletedInRow }) => (tasksCompletedInRow >= TASKS_BEFORE_MAINTENANCE),
     // TODO:
     taskPending: () => false,
@@ -230,6 +230,7 @@ const synthesizerMachine = createMachine({
 
     calculateEstimatedTime: assign((context) => {
       const { queue } = context;
+      if (!queue.length) return { allTasksEstimatedTime: 0 };
       let tasksNumber = 0;
       const tasksTime = queue
         .reduce((acc, task) => {
