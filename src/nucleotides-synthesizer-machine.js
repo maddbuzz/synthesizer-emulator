@@ -1,11 +1,18 @@
-/* eslint-disable no-param-reassign */
 import { assign, createMachine } from 'xstate';
-// import { useMachine } from 'xstate-vue2';
-
 import { getRandomIntegerInRange } from './math';
 
-const getRandomNucleotide = (nucleotides = 'ATGC') => nucleotides[getRandomIntegerInRange(0, nucleotides.length)];
+const TASKS_BEFORE_MAINTENANCE = 5;
+const ON_MAINTENANCE_TIME = 5000;
+const ELEMENT_SYNTHESIS_TIME = 1000;
+const ESTIMATED_TIME_RECALCULATION_INTERVAL = 1000;
 
+// Task statuses:
+const PENDING = 'PENDING';
+const PROCESSING = 'PROCESSING';
+const COMPLETED = 'COMPLETED';
+// const EDITING = 'EDITING';
+
+const getRandomNucleotide = (nucleotides = 'ATGC') => nucleotides[getRandomIntegerInRange(0, nucleotides.length)];
 const getRandomSequence = (minLengthInclusive = 6, maxLengthExclusive = 121) => {
   const length = getRandomIntegerInRange(minLengthInclusive, maxLengthExclusive);
   const sequence = Array
@@ -19,12 +26,15 @@ const synthesizerMachine = createMachine({
   type: 'parallel',
   predictableActionArguments: true,
   preserveActionOrder: true,
+
   context: {
     queue: [],
     currentTask: {},
     completedTasks: [],
     nextTaskID: 1,
     tasksCompletedInRow: 0,
+    allTasksEstimatedTime: 0,
+    allTasksEndTime: '',
   },
 
   states: {
@@ -49,7 +59,7 @@ const synthesizerMachine = createMachine({
             elementSynthesis: {
               entry: 'decrementElementsLeft',
               after: {
-                1000: [
+                ELEMENT_SYNTHESIS_TIME: [
                   {
                     target: '#nucleotidesSynthesizer.synthesizer.busy.elementSynthesis',
                     cond: 'elementsLeft',
@@ -81,7 +91,7 @@ const synthesizerMachine = createMachine({
         },
         onMaintenance: {
           after: {
-            5000: {
+            ON_MAINTENANCE_TIME: {
               target: '#nucleotidesSynthesizer.synthesizer.idle',
               actions: [],
               internal: false,
@@ -91,6 +101,7 @@ const synthesizerMachine = createMachine({
         },
       },
     },
+
     tasksQueue: {
       initial: 'waiting',
       states: {
@@ -135,12 +146,28 @@ const synthesizerMachine = createMachine({
         },
       },
     },
+
+    estimatedTimeCalculator: {
+      initial: 'calculateTime',
+      states: {
+        calculateTime: {
+          entry: 'calculateEstimatedTime',
+          after: {
+            ESTIMATED_TIME_RECALCULATION_INTERVAL: {
+              target: '#nucleotidesSynthesizer.estimatedTimeCalculator.calculateTime',
+              actions: [],
+              internal: false,
+            },
+          },
+        },
+      },
+    },
   },
 }, {
   guards: {
     queueNotEmpty: (context, _event) => (context.queue.length !== 0),
     elementsLeft: ({ currentTask }) => (currentTask.elementsLeft !== 0),
-    manyTasksCompletedInRow: ({ tasksCompletedInRow }) => (tasksCompletedInRow >= 5),
+    manyTasksCompletedInRow: ({ tasksCompletedInRow }) => (tasksCompletedInRow >= TASKS_BEFORE_MAINTENANCE),
     // TODO:
     taskPending: () => false,
   },
@@ -150,7 +177,7 @@ const synthesizerMachine = createMachine({
       currentTask: (context) => {
         const task = context.queue[0];
         task.elementsLeft = task.length;
-        task.status = 'processing';
+        task.status = PROCESSING;
         return task;
       },
     }),
@@ -165,16 +192,16 @@ const synthesizerMachine = createMachine({
 
     moveToCompleted: assign((context) => {
       const {
-        queue, currentTask, completedTasks,
+        queue, completedTasks, currentTask, tasksCompletedInRow,
       } = context;
       const index = queue.indexOf(currentTask);
       if (index === -1) throw Error("moveToCompleted: can't find currentTask!");
-      currentTask.status = 'completed';
-      context.tasksCompletedInRow += 1;
+      currentTask.status = COMPLETED;
       completedTasks.push(currentTask);
-      context.currentTask = {};
       queue.splice(index, 1);
-      return context;
+      return {
+        queue, completedTasks, currentTask: {}, tasksCompletedInRow: tasksCompletedInRow + 1,
+      };
     }),
 
     resetTasksCompletedInRow: assign({ tasksCompletedInRow: 0 }),
@@ -183,7 +210,7 @@ const synthesizerMachine = createMachine({
       queue: (context) => {
         const { queue, nextTaskID } = context;
         const defaultTask = {
-          id: nextTaskID, status: 'pending', priority: 2, sequence: '', length: 0,
+          id: nextTaskID, status: PENDING, priority: 2, sequence: '', length: 0,
         };
         const priority = getRandomIntegerInRange(1, 4);
         const newTask = { ...defaultTask, priority, ...getRandomSequence(6, 13) };
@@ -201,9 +228,31 @@ const synthesizerMachine = createMachine({
       },
     }),
 
+    calculateEstimatedTime: assign((context) => {
+      const { queue } = context;
+      let tasksNumber = 0;
+      const tasksTime = queue
+        .reduce((acc, task) => {
+          if (PENDING !== task.status && PROCESSING !== task.status) return acc;
+          tasksNumber += 1;
+          const time = (undefined !== task.elementsLeft ? task.elementsLeft : task.length) * ELEMENT_SYNTHESIS_TIME;
+          return acc + time;
+        }, 0);
+      const estimatedTime = tasksTime + (tasksNumber / TASKS_BEFORE_MAINTENANCE) * ON_MAINTENANCE_TIME;
+      const allTasksEstimatedTime = Math.trunc(estimatedTime);
+      const allTasksEndTime = (new Date(Date.now() + allTasksEstimatedTime)).toTimeString();
+      return { allTasksEstimatedTime, allTasksEndTime };
+    }),
+
     // TODO:
     editTask: () => console.log('editTask'),
     deleteTask: () => console.log('deleteTask'),
+  },
+
+  delays: { // can be a function: (context, event) => ...
+    ELEMENT_SYNTHESIS_TIME,
+    ON_MAINTENANCE_TIME,
+    ESTIMATED_TIME_RECALCULATION_INTERVAL,
   },
 });
 

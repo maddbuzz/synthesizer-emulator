@@ -13,6 +13,8 @@ defineProps({
     <div>{{state.context.currentTask}}</div>
     <div>tasksCompletedInRow = {{state.context.tasksCompletedInRow}}</div>
     <div>{{state.context.queue}}</div>
+    <div>{{state.context.allTasksEstimatedTime / 1000}}</div>
+    <div>{{state.context.allTasksEndTime}}</div>
     <div>{{state.context.completedTasks}}</div>
   </div>
 </template>
