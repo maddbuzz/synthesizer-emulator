@@ -6,17 +6,13 @@ import { useMachine } from 'xstate-vue2';
 import SynthesizerView from '../views/SynthesizerView.vue';
 import AllTasksView from '../views/AllTasksView.vue';
 import synthesizerMachine from '../nucleotides-synthesizer-machine';
+// import NotFound from '../components/NotFound.vue';
 
 const { state, send } = useMachine(synthesizerMachine);
 
 Vue.use(VueRouter);
 
 const routes = [
-  // {
-  //   path: '/',
-  //   name: 'home',
-  //   component: HomeView,
-  // },
   {
     path: '/',
     name: 'synthesizer',
@@ -37,6 +33,7 @@ const routes = [
     // which is lazy-loaded when the route is visited.
     component: () => import(/* webpackChunkName: "about" */ '../views/AboutView.vue'),
   },
+  // { path: '*', component: NotFound },
 ];
 
 const router = new VueRouter({

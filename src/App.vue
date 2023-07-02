@@ -1,28 +1,43 @@
 <template>
-  <div id="app">
-    <header>
-      <!-- <img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="125" height="125" /> -->
+  <v-app>
 
-      <div class="wrapper">
-        <nav>
-          <router-link to="/">Synthesizer</router-link>
-          <router-link to="/all-tasks">All tasks</router-link>
-          <!-- <router-link to="/about">About</router-link> -->
-        </nav>
-      </div>
-    </header>
+    <v-app-bar app>
+      <v-toolbar-title>
+        <!-- <router-link to="/" tag="span" style="cursor: pointer">{{ appTitle }}</router-link> -->
+        {{ appTitle }}
+      </v-toolbar-title>
+      <v-spacer></v-spacer>
+      <v-toolbar-items class="hidden-xs-only">
+        <v-btn text v-for="item in menuItems" :key="item.title" :to="item.path">
+          <v-icon left dark>{{ item.icon }}</v-icon>
+          {{ item.title }}
+        </v-btn>
+      </v-toolbar-items>
+    </v-app-bar>
 
-    <router-view />
-  </div>
+    <v-main>
+      <router-view></router-view>
+    </v-main>
+
+  </v-app>
 </template>
 
 <script>
-
 export default {
   name: 'App',
-
-  data: () => ({
-    //
-  }),
+  data() {
+    return {
+      appTitle: 'Nucleotides Synthesizer Emulator',
+      menuItems: [
+        // { title: 'Home', path: '/home', icon: 'home' },
+        // { title: 'Sign Up', path: '/signup', icon: 'face' },
+        // { title: 'Sign In', path: '/signin', icon: 'lock_open' },
+        { title: 'Synthesizer', path: '/' },
+        { title: 'All tasks', path: '/all-tasks' },
+      ],
+    };
+  },
 };
 </script>
+
+<style></style>

@@ -1,28 +1,25 @@
 <script setup>
+import _snakeCase from 'lodash/snakeCase';
+
 defineProps({
   state: Object,
   send: Function,
 });
-</script>
 
-<!-- <template>
-  <div>
-    <div>States = {{state.value}}</div>
-    <button @click="send('ADD_NEW_TASK')">Add task</button>
-    <div>nextTaskID = {{state.context.nextTaskID}}</div>
-    <div>{{state.context.currentTask}}</div>
-    <div>tasksCompletedInRow = {{state.context.tasksCompletedInRow}}</div>
-    <div>{{state.context.queue}}</div>
-    <div>{{state.context.allTasksEstimatedTime / 1000}}</div>
-    <div>{{state.context.allTasksEndTime}}</div>
-    <div>{{state.context.completedTasks}}</div>
-  </div>
-</template> -->
+const getSynthesizerStateName = (stateValue) => {
+  const synState = stateValue.synthesizer;
+  return typeof synState === 'object' ? 'BUSY' : _snakeCase(synState).toUpperCase();
+};
+</script>
 
 <template>
   <div>
-    <button @click="send('ADD_NEW_TASK')">Add task</button>
-    <v-data-table :headers="headers" :items="queue" :items-per-page="6" class="elevation-1">
+    <div>Synthesizer state: {{getSynthesizerStateName(state.value)}}</div>
+    <div>End time of all tasks: {{state.context.allTasksEndTime}} ({{state.context.allTasksEstimatedTime / 1000}} seconds left)</div>
+    <v-btn elevation="12" color="accent" rounded block @click="send('ADD_NEW_TASK')">
+      Add random task
+    </v-btn>
+    <v-data-table :headers="headers" :items="queue" :items-per-page="10" class="elevation-1">
       <template v-slot:item.priority="{ item }">
         <v-chip :color="getPriorityColor(item.priority)" dark>
           {{ getPriorityName(item.priority) }}
