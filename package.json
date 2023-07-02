@@ -48,7 +48,8 @@
     "rules": {
       "no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
       "no-console": "off",
-      "max-len":"off"
+      "max-len":"off",
+      "vue/valid-v-slot": ["error", { "allowModifiers": true }]
     }
   },
   "browserslist": [

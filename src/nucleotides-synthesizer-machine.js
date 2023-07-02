@@ -240,7 +240,7 @@ const synthesizerMachine = createMachine({
       const maintenancesTime = ON_MAINTENANCE_TIME * estimatedMaintenancesNumber;
 
       const allTasksEstimatedTime = tasksTime + maintenancesTime;
-      const allTasksEndTime = (new Date(Date.now() + allTasksEstimatedTime)).toTimeString();
+      const allTasksEndTime = (new Date(Date.now() + allTasksEstimatedTime)).toLocaleString('ru-RU');
       return { allTasksEstimatedTime, allTasksEndTime };
     }),
 
