@@ -210,6 +210,7 @@ const synthesizerMachine = createMachine({
       if (index === -1) throw Error("moveToCompleted: can't find currentTask!");
       currentTask.status = COMPLETED;
       currentTask.completedAt = Date.now();
+      delete currentTask.length;
       delete currentTask.elementsLeft;
       completedTasks.push(currentTask);
       queue.splice(index, 1);
