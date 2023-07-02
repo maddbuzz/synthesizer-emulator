@@ -17,7 +17,8 @@ const getSynthesizerStateName = (stateValue) => {
     <div>Synthesizer state: {{getSynthesizerStateName(state.value)}}</div>
     <div>End time of all tasks: {{state.context.allTasksEndTime}} ({{state.context.allTasksEstimatedTime / 1000}} seconds left)</div>
     <v-btn elevation="12" color="accent" rounded block @click="send('ADD_NEW_TASK')">
-      Add random task
+      <v-spacer>Add random task</v-spacer>
+      <v-icon>add_task</v-icon>
     </v-btn>
     <v-data-table :headers="headers" :items="queue" :items-per-page="10" class="elevation-1">
       <template v-slot:item.priority="{ item }">
