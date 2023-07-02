@@ -25,7 +25,7 @@ defineProps({
 export default {
   data() {
     const { queue, completedTasks } = this.state.context;
-    const allTasks = queue.concat(completedTasks); // shallow copy
+    const allTasks = completedTasks.concat(queue); // shallow copy
 
     return {
       headers: [
