@@ -25,7 +25,7 @@ defineProps({
     <v-data-table :headers="headers" :items="queue" :items-per-page="6" class="elevation-1">
       <template v-slot:item.priority="{ item }">
         <v-chip :color="getPriorityColor(item.priority)" dark>
-          {{ getPriorityString(item.priority) }}
+          {{ getPriorityName(item.priority) }}
         </v-chip>
       </template>
       <template v-slot:item.createdAt="{ item }">
@@ -57,15 +57,20 @@ export default {
   },
   methods: {
     getPriorityColor(priority) {
-      // console.log(priority);
-      if (priority > 2) return 'red';
-      if (priority < 2) return 'blue';
-      return 'green';
+      switch (priority) {
+        case 1: return 'blue';
+        case 2: return 'green';
+        case 3: return 'red';
+        default: throw Error(`Unknown priority ${priority}!`);
+      }
     },
-    getPriorityString(priority) {
-      if (priority > 2) return 'критичный';
-      if (priority < 2) return 'низкий';
-      return 'средний';
+    getPriorityName(priority) {
+      switch (priority) {
+        case 1: return 'Low';
+        case 2: return 'Average';
+        case 3: return 'Critical';
+        default: throw Error(`Unknown priority ${priority}!`);
+      }
     },
     getTimeString(timestamp) {
       return (new Date(timestamp)).toLocaleString('ru-RU');
