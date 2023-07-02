@@ -33,7 +33,7 @@ const synthesizerMachine = createMachine({
     completedTasks: [],
     nextTaskID: 1,
     tasksCompletedInRow: 0,
-    allTasksEstimatedTime: 0,
+    allTasksEstimatedTime: 0, // milliseconds
     allTasksEndTime: '',
   },
 
@@ -44,7 +44,7 @@ const synthesizerMachine = createMachine({
         idle: {
           always: {
             target: 'busy',
-            cond: 'queueNotEmpty',
+            cond: 'someTaskPending',
           },
         },
         busy: {
@@ -165,29 +165,41 @@ const synthesizerMachine = createMachine({
   },
 }, {
   guards: {
-    queueNotEmpty: (context, _event) => (!!context.queue.length),
-    elementsLeft: ({ currentTask }) => (!!currentTask.elementsLeft),
+    someTaskPending: ({ queue }) => queue.some((task) => (PENDING === task.status)),
+    elementsLeft: ({ currentTask }) => (currentTask.elementsLeft > 0),
     manyTasksCompletedInRow: ({ tasksCompletedInRow }) => (tasksCompletedInRow >= TASKS_BEFORE_MAINTENANCE),
     // TODO:
-    taskPending: () => false,
+    taskPending: (_context, _event) => false,
   },
 
   actions: {
-    prepareCurrentTask: assign({
-      currentTask: (context) => {
-        const task = context.queue[0];
-        task.elementsLeft = task.length;
-        task.status = PROCESSING;
-        return task;
-      },
+    pushTask: assign(({ queue, nextTaskID }) => {
+      const newTaskProps = {
+        id: nextTaskID, status: PENDING, priority: 2, sequence: '', length: 0,
+      };
+      const priority = getRandomIntegerInRange(1, 4);
+      const newTask = { ...newTaskProps, priority, ...getRandomSequence(6, 13) };
+      queue.push(newTask);
+      return { queue, nextTaskID: nextTaskID + 1 };
     }),
 
-    decrementElementsLeft: assign({
-      currentTask: (context) => {
-        const { currentTask } = context;
-        currentTask.elementsLeft -= 1;
-        return currentTask;
-      },
+    sortTasks: assign(({ queue }) => {
+      queue.sort((a, b) => b.priority - a.priority);
+      return { queue };
+    }),
+
+    prepareCurrentTask: assign(({ queue }) => {
+      const currentTask = queue.find((task) => (PENDING === task.status));
+      if (undefined === currentTask) throw Error("prepareCurrentTask: can't find pending task!");
+      currentTask.status = PROCESSING;
+      currentTask.elementsLeft = currentTask.length;
+      return { currentTask };
+    }),
+
+    decrementElementsLeft: assign((context) => {
+      const { currentTask } = context;
+      currentTask.elementsLeft -= 1;
+      return { currentTask };
     }),
 
     moveToCompleted: assign((context) => {
@@ -206,41 +218,25 @@ const synthesizerMachine = createMachine({
 
     resetTasksCompletedInRow: assign({ tasksCompletedInRow: 0 }),
 
-    pushTask: assign({
-      queue: (context) => {
-        const { queue, nextTaskID } = context;
-        const defaultTask = {
-          id: nextTaskID, status: PENDING, priority: 2, sequence: '', length: 0,
-        };
-        const priority = getRandomIntegerInRange(1, 4);
-        const newTask = { ...defaultTask, priority, ...getRandomSequence(6, 13) };
-        queue.push(newTask);
-        return queue;
-      },
-      nextTaskID: ({ nextTaskID }) => nextTaskID + 1,
-    }),
-
-    sortTasks: assign({
-      queue: (context) => {
-        const { queue } = context;
-        queue.sort((a, b) => b.priority - a.priority);
-        return queue;
-      },
-    }),
-
-    calculateEstimatedTime: assign((context) => {
-      const { queue } = context;
+    calculateEstimatedTime: assign(({ queue, tasksCompletedInRow }) => {
       if (!queue.length) return { allTasksEstimatedTime: 0 };
+      if (TASKS_BEFORE_MAINTENANCE === tasksCompletedInRow) return {}; // synthesizer on maintenance?
+
       let tasksNumber = 0;
       const tasksTime = queue
         .reduce((acc, task) => {
-          if (PENDING !== task.status && PROCESSING !== task.status) return acc;
+          if ((PENDING !== task.status) && (PROCESSING !== task.status)) return acc;
           tasksNumber += 1;
           const time = (undefined !== task.elementsLeft ? task.elementsLeft : task.length) * ELEMENT_SYNTHESIS_TIME;
           return acc + time;
         }, 0);
-      const estimatedTime = tasksTime + (tasksNumber / TASKS_BEFORE_MAINTENANCE) * ON_MAINTENANCE_TIME;
-      const allTasksEstimatedTime = Math.trunc(estimatedTime);
+
+      let estimatedMaintenancesNumber = (tasksCompletedInRow + tasksNumber) / TASKS_BEFORE_MAINTENANCE;
+      if (Number.isInteger(estimatedMaintenancesNumber)) estimatedMaintenancesNumber -= 1;
+      else estimatedMaintenancesNumber = Math.trunc(estimatedMaintenancesNumber);
+      const maintenancesTime = ON_MAINTENANCE_TIME * estimatedMaintenancesNumber;
+
+      const allTasksEstimatedTime = tasksTime + maintenancesTime;
       const allTasksEndTime = (new Date(Date.now() + allTasksEstimatedTime)).toTimeString();
       return { allTasksEstimatedTime, allTasksEndTime };
     }),
@@ -250,7 +246,7 @@ const synthesizerMachine = createMachine({
     deleteTask: () => console.log('deleteTask'),
   },
 
-  delays: { // can be a function: (context, event) => ...
+  delays: { // can be a constant or a function: (context, event) => ...
     ELEMENT_SYNTHESIS_TIME,
     ON_MAINTENANCE_TIME,
     ESTIMATED_TIME_RECALCULATION_INTERVAL,
