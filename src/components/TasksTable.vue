@@ -1,7 +1,5 @@
 <script setup>
 defineProps({
-  state: Object,
-  send: Function,
   additionalHeaders: Array,
   tasks: Array,
 });

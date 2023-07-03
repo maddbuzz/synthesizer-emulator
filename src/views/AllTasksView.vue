@@ -14,7 +14,7 @@ const allTasks = completedTasks.concat(queue); // shallow copy
 </script>
 
 <template>
-  <tasks-table :state="state" :send="send" :additionalHeaders="additionalHeaders" :tasks="allTasks"/>
+  <tasks-table :additionalHeaders="additionalHeaders" :tasks="allTasks"/>
 </template>
 
 <script>

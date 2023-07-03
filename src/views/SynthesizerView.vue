@@ -20,7 +20,7 @@ const { queue } = props.state.context;
     <v-btn elevation="4" color="accent" rounded block @click="send('ADD_NEW_TASK')">
       Add random task
     </v-btn>
-    <tasks-table :state="state" :send="send" :additionalHeaders="additionalHeaders" :tasks="queue"/>
+    <tasks-table :additionalHeaders="additionalHeaders" :tasks="queue"/>
   </div>
 </template>
 
