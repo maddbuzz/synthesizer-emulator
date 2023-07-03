@@ -175,7 +175,7 @@ const synthesizerMachine = createMachine({
   actions: {
     pushTask: assign(({ queue, nextTaskID }) => {
       const newTaskProps = {
-        id: nextTaskID, status: PENDING, priority: 2, sequence: '', length: 0, createdAt: Date.now(),
+        id: nextTaskID, status: PENDING, priority: 2, sequence: '', length: 0, createdAt: Date.now(), taskEndTime: 0,
       };
       const priority = getRandomIntegerInRange(1, 4);
       const newTask = { ...newTaskProps, priority, ...getRandomSequence(6, 13) };
@@ -210,6 +210,7 @@ const synthesizerMachine = createMachine({
       if (index === -1) throw Error("moveToCompleted: can't find currentTask!");
       currentTask.status = COMPLETED;
       currentTask.completedAt = Date.now();
+      delete currentTask.taskEndTime;
       delete currentTask.length;
       delete currentTask.elementsLeft;
       completedTasks.push(currentTask);
@@ -233,22 +234,21 @@ const synthesizerMachine = createMachine({
         if ((PENDING !== task.status) && (PROCESSING !== task.status)) return accTime;
         tasksNumber += 1;
         const taskTime = (undefined !== task.elementsLeft ? task.elementsLeft : task.length) * ELEMENT_SYNTHESIS_TIME;
+        const newAccTime = accTime + taskTime;
 
         let estimatedMaintenancesNumber = (tasksCompletedInRow + tasksNumber) / TASKS_BEFORE_MAINTENANCE;
         if (Number.isInteger(estimatedMaintenancesNumber)) estimatedMaintenancesNumber -= 1;
         else estimatedMaintenancesNumber = Math.trunc(estimatedMaintenancesNumber);
         const maintenancesTime = ON_MAINTENANCE_TIME * estimatedMaintenancesNumber;
 
-        const accumulatedTime = accTime + taskTime;
-
-        taskEstimatedTime = accumulatedTime + maintenancesTime;
+        taskEstimatedTime = newAccTime + maintenancesTime;
         taskEndTime = Date.now() + taskEstimatedTime;
-        Object.assign(task, { taskEndTime });
+        Object.assign(task, { taskEndTime }); // ?
 
-        return accumulatedTime;
+        return newAccTime;
       }, 0);
 
-      return { allTasksEstimatedTime: taskEstimatedTime, allTasksEndTime: taskEndTime };
+      return { queue, allTasksEstimatedTime: taskEstimatedTime, allTasksEndTime: taskEndTime };
     }),
 
     // TODO:

@@ -7,12 +7,6 @@ const props = defineProps({
   send: Function,
 });
 
-const getSynthesizerStateName = (stateValue) => {
-  const synState = stateValue.synthesizer;
-  const camelCaseString = typeof synState === 'object' ? Object.keys(synState)[0] : synState;
-  return _snakeCase(camelCaseString).toUpperCase();
-};
-
 const additionalHeaders = [
   { text: 'Estimated end time', value: 'taskEndTime' },
 ];
@@ -21,7 +15,7 @@ const { queue } = props.state.context;
 
 <template>
   <div>
-    <div>Synthesizer state: {{getSynthesizerStateName(state.value)}}</div>
+    <div>Synthesizer state: {{getSynthesizerStateNameString}}</div>
     <div>End time of all tasks: {{getAllTasksEndTimeString}} ({{getAllTasksEstimatedTimeString}} seconds left)</div>
     <v-btn elevation="4" color="accent" rounded block @click="send('ADD_NEW_TASK')">
       Add random task
@@ -33,9 +27,11 @@ const { queue } = props.state.context;
 <script>
 export default {
   name: 'SynthesizerView',
+
   components: {
     TasksTable,
   },
+
   computed: {
     getAllTasksEndTimeString() {
       const { allTasksEndTime } = this.state.context;
@@ -45,6 +41,11 @@ export default {
     getAllTasksEstimatedTimeString() {
       const { allTasksEstimatedTime } = this.state.context;
       return allTasksEstimatedTime / 1000;
+    },
+    getSynthesizerStateNameString() {
+      const synState = this.state.value.synthesizer;
+      const camelCaseString = typeof synState === 'object' ? Object.keys(synState)[0] : synState;
+      return _snakeCase(camelCaseString).toUpperCase();
     },
   },
 };
