@@ -2,11 +2,12 @@
 defineProps({
   additionalHeaders: Array,
   tasks: Array,
+  itemsPerPage: Number,
 });
 </script>
 
 <template>
-  <v-data-table :headers="headers" :items="items" :items-per-page="15" class="elevation-4">
+  <v-data-table :headers="headers" :items="items" :items-per-page="itemsPerPage" class="elevation-4">
     <template v-slot:item.priority="{ item }">
       <v-chip :color="getPriorityColor(item.priority)" dark>
         {{ getPriorityName(item.priority) }}
