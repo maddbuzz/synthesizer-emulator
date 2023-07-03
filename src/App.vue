@@ -1,3 +1,10 @@
+<script setup>
+import { useMachine } from 'xstate-vue2';
+import synthesizerMachine from './nucleotides-synthesizer-machine';
+
+const { state, send } = useMachine(synthesizerMachine);
+</script>
+
 <template>
   <v-app>
 
@@ -16,7 +23,8 @@
     </v-app-bar>
 
     <v-main>
-      <router-view></router-view>
+      <!-- <router-view></router-view> -->
+      <router-view :state="state" :send="send"></router-view>
     </v-main>
 
   </v-app>
