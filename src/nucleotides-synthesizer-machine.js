@@ -33,8 +33,8 @@ const synthesizerMachine = createMachine({
     completedTasks: [],
     nextTaskID: 1,
     tasksCompletedInRow: 0,
-    allTasksEstimatedTime: 0, // milliseconds
-    allTasksEndTime: '',
+    allTasksEstimatedTime: 0, // milliseconds timestamp
+    allTasksEndTime: 0, // also timestamp
   },
 
   states: {
@@ -225,23 +225,30 @@ const synthesizerMachine = createMachine({
       if (!queue.length) return { allTasksEstimatedTime: 0 };
       if (TASKS_BEFORE_MAINTENANCE === tasksCompletedInRow) return {}; // synthesizer on maintenance?
 
+      let taskEstimatedTime = 0;
+      let taskEndTime = 0;
+
       let tasksNumber = 0;
-      const tasksTime = queue
-        .reduce((acc, task) => {
-          if ((PENDING !== task.status) && (PROCESSING !== task.status)) return acc;
-          tasksNumber += 1;
-          const time = (undefined !== task.elementsLeft ? task.elementsLeft : task.length) * ELEMENT_SYNTHESIS_TIME;
-          return acc + time;
-        }, 0);
+      queue.reduce((accTime, task) => {
+        if ((PENDING !== task.status) && (PROCESSING !== task.status)) return accTime;
+        tasksNumber += 1;
+        const taskTime = (undefined !== task.elementsLeft ? task.elementsLeft : task.length) * ELEMENT_SYNTHESIS_TIME;
 
-      let estimatedMaintenancesNumber = (tasksCompletedInRow + tasksNumber) / TASKS_BEFORE_MAINTENANCE;
-      if (Number.isInteger(estimatedMaintenancesNumber)) estimatedMaintenancesNumber -= 1;
-      else estimatedMaintenancesNumber = Math.trunc(estimatedMaintenancesNumber);
-      const maintenancesTime = ON_MAINTENANCE_TIME * estimatedMaintenancesNumber;
+        let estimatedMaintenancesNumber = (tasksCompletedInRow + tasksNumber) / TASKS_BEFORE_MAINTENANCE;
+        if (Number.isInteger(estimatedMaintenancesNumber)) estimatedMaintenancesNumber -= 1;
+        else estimatedMaintenancesNumber = Math.trunc(estimatedMaintenancesNumber);
+        const maintenancesTime = ON_MAINTENANCE_TIME * estimatedMaintenancesNumber;
 
-      const allTasksEstimatedTime = tasksTime + maintenancesTime;
-      const allTasksEndTime = (new Date(Date.now() + allTasksEstimatedTime)).toLocaleString('ru-RU');
-      return { allTasksEstimatedTime, allTasksEndTime };
+        const accumulatedTime = accTime + taskTime;
+
+        taskEstimatedTime = accumulatedTime + maintenancesTime;
+        taskEndTime = Date.now() + taskEstimatedTime;
+        Object.assign(task, { taskEndTime });
+
+        return accumulatedTime;
+      }, 0);
+
+      return { allTasksEstimatedTime: taskEstimatedTime, allTasksEndTime: taskEndTime };
     }),
 
     // TODO:

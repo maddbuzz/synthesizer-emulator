@@ -14,7 +14,7 @@ const getSynthesizerStateName = (stateValue) => {
 };
 
 const additionalHeaders = [
-  { text: 'Estimated time', value: 'estimatedTime' },
+  { text: 'Estimated end time', value: 'taskEndTime' },
 ];
 const { queue } = props.state.context;
 </script>
@@ -22,7 +22,7 @@ const { queue } = props.state.context;
 <template>
   <div>
     <div>Synthesizer state: {{getSynthesizerStateName(state.value)}}</div>
-    <div>End time of all tasks: {{state.context.allTasksEndTime}} ({{state.context.allTasksEstimatedTime / 1000}} seconds left)</div>
+    <div>End time of all tasks: {{getAllTasksEndTimeString}} ({{getAllTasksEstimatedTimeString}} seconds left)</div>
     <v-btn elevation="4" color="accent" rounded block @click="send('ADD_NEW_TASK')">
       Add random task
     </v-btn>
@@ -35,6 +35,17 @@ export default {
   name: 'SynthesizerView',
   components: {
     TasksTable,
+  },
+  computed: {
+    getAllTasksEndTimeString() {
+      const { allTasksEndTime } = this.state.context;
+      if (!allTasksEndTime) return '';
+      return (new Date(allTasksEndTime)).toLocaleString('ru-RU');
+    },
+    getAllTasksEstimatedTimeString() {
+      const { allTasksEstimatedTime } = this.state.context;
+      return allTasksEstimatedTime / 1000;
+    },
   },
 };
 </script>

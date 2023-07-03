@@ -17,6 +17,9 @@ defineProps({
     <template v-slot:item.createdAt="{ item }">
       {{ getTimeString(item.createdAt) }}
     </template>
+    <template v-slot:item.taskEndTime="{ item }">
+      {{ getTimeString(item.taskEndTime) }}
+    </template>
     <template v-slot:item.completedAt="{ item }">
       {{ getTimeString(item.completedAt) }}
     </template>
