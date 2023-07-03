@@ -1,15 +1,22 @@
 <script setup>
 import _snakeCase from 'lodash/snakeCase';
+import TasksTable from '../components/TasksTable.vue';
 
-defineProps({
+const props = defineProps({
   state: Object,
   send: Function,
 });
 
 const getSynthesizerStateName = (stateValue) => {
   const synState = stateValue.synthesizer;
-  return typeof synState === 'object' ? 'BUSY' : _snakeCase(synState).toUpperCase();
+  const camelCaseString = typeof synState === 'object' ? Object.keys(synState)[0] : synState;
+  return _snakeCase(camelCaseString).toUpperCase();
 };
+
+const additionalHeaders = [
+  { text: 'Estimated time', value: 'estimatedTime' },
+];
+const { queue } = props.state.context;
 </script>
 
 <template>
@@ -17,63 +24,17 @@ const getSynthesizerStateName = (stateValue) => {
     <div>Synthesizer state: {{getSynthesizerStateName(state.value)}}</div>
     <div>End time of all tasks: {{state.context.allTasksEndTime}} ({{state.context.allTasksEstimatedTime / 1000}} seconds left)</div>
     <v-btn elevation="12" color="accent" rounded block @click="send('ADD_NEW_TASK')">
-      <v-spacer>Add random task</v-spacer>
-      <v-icon>add_task</v-icon>
+      Add random task
     </v-btn>
-    <v-data-table :headers="headers" :items="queue" :items-per-page="10" class="elevation-1">
-      <template v-slot:item.priority="{ item }">
-        <v-chip :color="getPriorityColor(item.priority)" dark>
-          {{ getPriorityName(item.priority) }}
-        </v-chip>
-      </template>
-      <template v-slot:item.createdAt="{ item }">
-        {{ getTimeString(item.createdAt) }}
-      </template>
-      <template v-slot:item.completedAt="{ item }">
-        {{ getTimeString(item.completedAt) }}
-      </template>
-    </v-data-table>
+    <tasks-table :state="state" :send="send" :additionalHeaders="additionalHeaders" :tasks="queue"/>
   </div>
 </template>
 
 <script>
 export default {
-  data() {
-    const { queue } = this.state.context;
-
-    return {
-      headers: [
-        { text: 'ID', value: 'id', align: 'start' },
-        { text: 'Status', value: 'status' },
-        { text: 'Priority', value: 'priority' },
-        { text: 'Sequence', value: 'sequence', sortable: false },
-        { text: 'Created at', value: 'createdAt' },
-        { text: 'Estimated time', value: 'estimatedTime' },
-      ],
-      queue,
-    };
-  },
-  methods: {
-    getPriorityColor(priority) {
-      switch (priority) {
-        case 1: return 'blue';
-        case 2: return 'green';
-        case 3: return 'red';
-        default: throw Error(`Unknown priority ${priority}!`);
-      }
-    },
-    getPriorityName(priority) {
-      switch (priority) {
-        case 1: return 'Low';
-        case 2: return 'Average';
-        case 3: return 'Critical';
-        default: throw Error(`Unknown priority ${priority}!`);
-      }
-    },
-    getTimeString(timestamp) {
-      if (!timestamp) return '';
-      return (new Date(timestamp)).toLocaleString('ru-RU');
-    },
+  name: 'SynthesizerView',
+  components: {
+    TasksTable,
   },
 };
 </script>

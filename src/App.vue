@@ -32,7 +32,7 @@ export default {
         // { title: 'Home', path: '/home', icon: 'home' },
         // { title: 'Sign Up', path: '/signup', icon: 'face' },
         // { title: 'Sign In', path: '/signin', icon: 'lock_open' },
-        { title: 'Synthesizer', path: '/', icon: 'home' },
+        { title: 'Synthesizer', path: '/', icon: 'add_task' },
         { title: 'All tasks', path: '/all-tasks', icon: 'table_rows' },
       ],
     };
