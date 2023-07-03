@@ -22,9 +22,12 @@ const { queue } = props.state.context;
     </v-btn>
     <tasks-table :additionalHeaders="additionalHeaders" :tasks="queue" :itemsPerPage="5" />
     <v-col class="text-center text-h5" cols="12">
-      <span class="rounded-lg red red--text text--lighten-5">{{ splitCurrentSequence[0] }}</span>
-      <span class="rounded-lg purple purple--text text--lighten-5">{{ splitCurrentSequence[1] }}</span>
-      <span class="rounded-lg blue blue--text text--lighten-5">{{ splitCurrentSequence[2] }}</span>
+      <!-- <span class="red white--text">{{ splitCurrentSequence[0] }}</span> -->
+      <!-- <span class="purple white--text">{{ splitCurrentSequence[1] }}</span> -->
+      <!-- <span class="blue blue--text text--lighten-5">{{ splitCurrentSequence[2] }}</span> -->
+      <span class="blue white--text">{{ splitCurrentSequence[0] }}</span>
+      <span class="red white--text">{{ splitCurrentSequence[1] }}</span>
+      <span class="blue--text">{{ splitCurrentSequence[2] }}</span>
     </v-col>
   </div>
 </template>
