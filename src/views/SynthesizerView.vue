@@ -23,7 +23,7 @@ const { queue } = props.state.context;
   <div>
     <div>Synthesizer state: {{getSynthesizerStateName(state.value)}}</div>
     <div>End time of all tasks: {{state.context.allTasksEndTime}} ({{state.context.allTasksEstimatedTime / 1000}} seconds left)</div>
-    <v-btn elevation="12" color="accent" rounded block @click="send('ADD_NEW_TASK')">
+    <v-btn elevation="4" color="accent" rounded block @click="send('ADD_NEW_TASK')">
       Add random task
     </v-btn>
     <tasks-table :state="state" :send="send" :additionalHeaders="additionalHeaders" :tasks="queue"/>
