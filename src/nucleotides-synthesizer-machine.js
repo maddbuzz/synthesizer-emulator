@@ -178,7 +178,6 @@ const synthesizerMachine = createMachine({
   actions: {
     pushTask: assign({
       queue: ({ queue, nextTaskID }, event) => {
-        // console.log('pushTask event', event);
         const newTaskProps = {
           id: nextTaskID, status: PENDING, priority: 2, sequence: '', length: 0, createdAt: Date.now(), taskEndTime: 0,
         };
@@ -229,7 +228,7 @@ const synthesizerMachine = createMachine({
       if (index === -1) throw Error("moveToCompleted: can't find currentTask!");
       currentTask.status = COMPLETED;
       currentTask.completedAt = Date.now();
-      delete currentTask.taskEndTime;
+      // delete currentTask.taskEndTime;
       delete currentTask.length;
       delete currentTask.elementsLeft;
       completedTasks.push(currentTask);

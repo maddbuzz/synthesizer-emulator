@@ -11,16 +11,16 @@ defineProps({
 </script>
 
 <template>
-  <form>
+  <form class="pa-2 elevation-4">
     <v-text-field v-model="sequence" :error-messages="sequenceErrors" :counter="120" label="Sequence" required
       @input="$v.sequence.$touch()" @blur="$v.sequence.$touch()"></v-text-field>
     <v-select v-model="select" :items="priorities" :error-messages="selectErrors" label="Priority" required
       @change="$v.select.$touch()" @blur="$v.select.$touch()"></v-select>
 
-    <v-btn class="mr-4" @click="addTask">
+    <v-btn class="mr-3" @click="addTask">
       add new task
     </v-btn>
-    <v-btn class="mr-4" @click="randomizeTask">
+    <v-btn class="mr-3" @click="randomizeTask">
       randomize
     </v-btn>
     <v-btn @click="clear">

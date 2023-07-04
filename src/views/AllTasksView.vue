@@ -7,6 +7,7 @@ const props = defineProps({
 });
 
 const additionalHeaders = [
+  { text: 'Estimated end time', value: 'taskEndTime' },
   { text: 'Completed at', value: 'completedAt' },
 ];
 const { queue, completedTasks } = props.state.context;

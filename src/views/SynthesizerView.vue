@@ -15,7 +15,7 @@ const { queue } = props.state.context;
 </script>
 
 <template>
-  <v-container>
+  <v-container fluid>
     <v-row class="text-center">
       <v-col cols="12">
         <div class="text-center">Synthesizer state: {{ getSynthesizerStateNameString }}</div>
@@ -26,14 +26,14 @@ const { queue } = props.state.context;
           seconds left)</div>
       </v-col>
     </v-row>
-    <v-row justify="center">
-      <v-col cols="6">
+    <v-row justify="center" class="text-center">
+      <v-col cols="8">
         <task-input :send="send" />
       </v-col>
     </v-row>
     <v-row>
       <v-col cols="12">
-        <tasks-table :additionalHeaders="additionalHeaders" :tasks="queue" :itemsPerPage="10" />
+        <tasks-table :additionalHeaders="additionalHeaders" :tasks="queue" :itemsPerPage="9" />
       </v-col>
     </v-row>
   </v-container>
