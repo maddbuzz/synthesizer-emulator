@@ -12,8 +12,10 @@ const PROCESSING = 'PROCESSING';
 const COMPLETED = 'COMPLETED';
 // const EDITING = 'EDITING';
 
-const getRandomNucleotide = (nucleotides = 'ATGC') => nucleotides[getRandomIntegerInRange(0, nucleotides.length)];
-const getRandomSequence = (minLengthInclusive = 6, maxLengthExclusive = 121) => {
+export const allowedNucleotides = 'ATGC';
+
+const getRandomNucleotide = (nucleotides = allowedNucleotides) => nucleotides[getRandomIntegerInRange(0, nucleotides.length)];
+export const getRandomSequence = (minLengthInclusive = 6, maxLengthExclusive = 121) => {
   const length = getRandomIntegerInRange(minLengthInclusive, maxLengthExclusive);
   const sequence = Array
     .from({ length }, () => getRandomNucleotide())
@@ -108,6 +110,7 @@ const synthesizerMachine = createMachine({
         waiting: {
           on: {
             ADD_NEW_TASK: {
+              // actions: [(context, event) => console.log(event)],
               target: 'taskEnqueueing',
             },
             EDIT_TASK: {
@@ -174,13 +177,15 @@ const synthesizerMachine = createMachine({
 
   actions: {
     pushTask: assign({
-      queue: ({ queue, nextTaskID }) => {
+      queue: ({ queue, nextTaskID }, event) => {
+        // console.log('pushTask event', event);
         const newTaskProps = {
           id: nextTaskID, status: PENDING, priority: 2, sequence: '', length: 0, createdAt: Date.now(), taskEndTime: 0,
         };
-        const priority = getRandomIntegerInRange(1, 4);
-        const newTask = { ...newTaskProps, priority, ...getRandomSequence(6, 13) };
-        // const newTask = { ...newTaskProps, priority, ...getRandomSequence() };
+        const { priority, sequence } = event;
+        const newTask = {
+          ...newTaskProps, priority, sequence, length: sequence.length,
+        };
         queue.push(newTask);
         return queue;
       },

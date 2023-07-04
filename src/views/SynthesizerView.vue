@@ -1,6 +1,7 @@
 <script setup>
 import _snakeCase from 'lodash/snakeCase';
 import TasksTable from '../components/TasksTable.vue';
+import TaskInput from '../components/TaskInput.vue';
 
 const props = defineProps({
   state: Object,
@@ -21,10 +22,9 @@ const { queue } = props.state.context;
       <span class="red white--text">{{ splitCurrentSequence[1] }}</span>
       <span class="blue--text">{{ splitCurrentSequence[2] }}</span>
     </v-col>
-    <div class="text-center">End time of all tasks: {{ getAllTasksEndTimeString }} ({{ getAllTasksEstimatedTime }} seconds left)</div>
-    <v-btn elevation="4" color="accent" rounded block @click="send('ADD_NEW_TASK')">
-      Add random task
-    </v-btn>
+    <div class="text-center">End time of all tasks: {{ getAllTasksEndTimeString }} ({{ getAllTasksEstimatedTime }} seconds
+      left)</div>
+    <task-input :send="send" />
     <tasks-table :additionalHeaders="additionalHeaders" :tasks="queue" :itemsPerPage="10" />
   </div>
 </template>
@@ -35,6 +35,7 @@ export default {
 
   components: {
     TasksTable,
+    TaskInput,
   },
 
   computed: {
