@@ -1,7 +1,8 @@
 <script setup>
 import _snakeCase from 'lodash/snakeCase';
 import TasksTable from '../components/TasksTable.vue';
-import TaskInput from '../components/TaskInput.vue';
+// import TaskForm from '../components/TaskForm.vue';
+import TaskDialog from '../components/TaskDialog.vue';
 
 const props = defineProps({
   state: Object,
@@ -19,21 +20,22 @@ const { queue } = props.state.context;
     <v-row class="text-center">
       <v-col cols="12">
         <div class="text-center">Synthesizer state: {{ getSynthesizerStateNameString }}</div>
-        <span class="text-h5 blue white--text">{{ splitCurrentSequence[0] }}</span>
-        <span class="text-h5 red white--text">{{ splitCurrentSequence[1] }}</span>
-        <span class="text-h5 blue--text">{{ splitCurrentSequence[2] }}</span>
+        <span class="text-h6 blue white--text">{{ splitCurrentSequence[0] }}</span>
+        <span class="text-h6 red white--text">{{ splitCurrentSequence[1] }}</span>
+        <span class="text-h6 blue--text">{{ splitCurrentSequence[2] }}</span>
         <div class="text-center">End time of all tasks: {{ getAllTasksEndTimeString }} ({{ getAllTasksEstimatedTime }}
           seconds left)</div>
+        <task-dialog class="mt-3" :state="state" :send="send" />
       </v-col>
     </v-row>
-    <v-row justify="center" class="text-center">
+    <!-- <v-row justify="center" class="text-center">
       <v-col cols="8">
-        <task-input :send="send" />
+        <task-form :send="send" />
       </v-col>
-    </v-row>
+    </v-row> -->
     <v-row>
       <v-col cols="12">
-        <tasks-table :additionalHeaders="additionalHeaders" :tasks="queue" :itemsPerPage="9" />
+        <tasks-table :additionalHeaders="additionalHeaders" :tasks="queue" :itemsPerPage="10" />
       </v-col>
     </v-row>
   </v-container>
@@ -45,7 +47,8 @@ export default {
 
   components: {
     TasksTable,
-    TaskInput,
+    // TaskForm,
+    TaskDialog,
   },
 
   computed: {

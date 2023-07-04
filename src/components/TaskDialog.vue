@@ -6,32 +6,53 @@ import { getRandomIntegerInRange } from '../math';
 import { allowedNucleotides, getRandomSequence } from '../nucleotides-synthesizer-machine';
 
 defineProps({
+  state: Object,
   send: Function,
 });
 </script>
 
 <template>
-  <form class="pa-2 elevation-4">
-    <v-text-field v-model="sequence" :error-messages="sequenceErrors" :counter="120" label="Sequence" required
-      @input="$v.sequence.$touch()" @blur="$v.sequence.$touch()"></v-text-field>
-    <v-select v-model="select" :items="priorities" :error-messages="selectErrors" label="Priority" required
-      @change="$v.select.$touch()" @blur="$v.select.$touch()"></v-select>
+  <div>
+    <v-dialog v-model="dialog" width="1250">
 
-    <v-btn class="mr-3" @click="addTask">
-      add new task
-    </v-btn>
-    <v-btn class="mr-3" @click="randomizeTask">
-      randomize
-    </v-btn>
-    <v-btn @click="clear">
-      clear
-    </v-btn>
-  </form>
+      <template v-slot:activator="{ on, attrs }">
+        <v-btn class="blue white--text" v-bind="attrs" v-on="on">
+          add task
+        </v-btn>
+      </template>
+
+      <v-card class="text-center" outlined>
+        <v-card-title class="text-h6 blue white--text">
+          Adding new task
+        </v-card-title>
+
+        <form class="pa-2">
+          <v-text-field v-model="getID" label="ID" disabled></v-text-field>
+          <v-text-field v-model="sequence" :error-messages="sequenceErrors" :counter="120" label="Sequence" required
+            @input="$v.sequence.$touch()" @blur="$v.sequence.$touch()"></v-text-field>
+          <v-select v-model="select" :items="priorities" :error-messages="selectErrors" label="Priority" required
+            @change="$v.select.$touch()" @blur="$v.select.$touch()"></v-select>
+
+          <v-btn class="blue white--text mr-3" @click="addTask">
+            add task
+          </v-btn>
+          <v-btn class="blue white--text mr-3" @click="randomizeTask">
+            randomize
+          </v-btn>
+          <v-btn class="blue white--text" @click="clear">
+            clear
+          </v-btn>
+        </form>
+
+      </v-card>
+
+    </v-dialog>
+  </div>
 </template>
 
 <script>
 export default {
-  name: 'TaskInput',
+  name: 'TaskDialog',
 
   mixins: [validationMixin],
 
@@ -41,6 +62,9 @@ export default {
   },
 
   data: () => ({
+    dialog: false, // initial state
+
+    // id: state.context.nextTaskID, // !error! - use computed getID instead!
     sequence: '',
     select: 'Average', // null,
     priorities: [
@@ -71,12 +95,13 @@ export default {
       if (!this.$v.sequence.required) errors.push('Sequence is required');
       return errors;
     },
+    getID() {
+      // console.log('this.state.context.nextTaskID', this.state.context.nextTaskID);
+      return this.state.context.nextTaskID;
+    },
   },
 
   methods: {
-    // submit() {
-    //   this.$v.$touch();
-    // },
     addTask() {
       this.$v.$touch();
       if (this.sequenceErrors.length || this.selectErrors.length) return;
@@ -84,6 +109,7 @@ export default {
       const { $model: pri } = this.$v.select;
       const sequence = seq.toUpperCase();
       const priority = this.priorities.indexOf(pri) + 1;
+      // console.log('this.state.context.nextTaskID', this.state.context.nextTaskID);
       this.send('ADD_NEW_TASK', { sequence, priority });
     },
     randomizeTask() {
