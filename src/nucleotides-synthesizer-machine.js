@@ -179,8 +179,8 @@ const synthesizerMachine = createMachine({
           id: nextTaskID, status: PENDING, priority: 2, sequence: '', length: 0, createdAt: Date.now(), taskEndTime: 0,
         };
         const priority = getRandomIntegerInRange(1, 4);
-        // const newTask = { ...newTaskProps, priority, ...getRandomSequence(6, 13) };
-        const newTask = { ...newTaskProps, priority, ...getRandomSequence() };
+        const newTask = { ...newTaskProps, priority, ...getRandomSequence(6, 13) };
+        // const newTask = { ...newTaskProps, priority, ...getRandomSequence() };
         queue.push(newTask);
         return queue;
       },

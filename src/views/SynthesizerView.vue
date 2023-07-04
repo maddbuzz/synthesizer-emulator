@@ -15,20 +15,17 @@ const { queue } = props.state.context;
 
 <template>
   <div>
-    <div>Synthesizer state: {{ getSynthesizerStateNameString }}</div>
-    <div>End time of all tasks: {{ getAllTasksEndTimeString }} ({{ getAllTasksEstimatedTime }} seconds left)</div>
-    <v-btn elevation="4" color="accent" rounded block @click="send('ADD_NEW_TASK')">
-      Add random task
-    </v-btn>
-    <tasks-table :additionalHeaders="additionalHeaders" :tasks="queue" :itemsPerPage="10" />
+    <div class="text-center">Synthesizer state: {{ getSynthesizerStateNameString }}</div>
     <v-col class="text-center text-h5">
-      <!-- <span class="red white--text">{{ splitCurrentSequence[0] }}</span> -->
-      <!-- <span class="purple white--text">{{ splitCurrentSequence[1] }}</span> -->
-      <!-- <span class="blue blue--text text--lighten-5">{{ splitCurrentSequence[2] }}</span> -->
       <span class="blue white--text">{{ splitCurrentSequence[0] }}</span>
       <span class="red white--text">{{ splitCurrentSequence[1] }}</span>
       <span class="blue--text">{{ splitCurrentSequence[2] }}</span>
     </v-col>
+    <div class="text-center">End time of all tasks: {{ getAllTasksEndTimeString }} ({{ getAllTasksEstimatedTime }} seconds left)</div>
+    <v-btn elevation="4" color="accent" rounded block @click="send('ADD_NEW_TASK')">
+      Add random task
+    </v-btn>
+    <tasks-table :additionalHeaders="additionalHeaders" :tasks="queue" :itemsPerPage="10" />
   </div>
 </template>
 
@@ -56,8 +53,13 @@ export default {
       return _snakeCase(camelCaseString).toUpperCase();
     },
     splitCurrentSequence() {
-      const { currentTask } = this.state.context;
-      if (!Object.hasOwn(currentTask, 'elementsLeft')) return ['', '', ''];
+      const { state } = this;
+      const { currentTask } = state.context;
+      if (!Object.hasOwn(currentTask, 'elementsLeft')) {
+        if (state.matches('synthesizer.onMaintenance')) return ['', '🛠', ''];
+        if (state.matches('synthesizer.idle')) return ['', '', '♻']; // ['♺', '♲', '♻'];
+        throw Error(`splitCurrentSequence: unknown state ${state.value}!`);
+      }
       const { sequence, length, elementsLeft } = currentTask;
       const currentIndex = length - 1 - elementsLeft;
       const completed = sequence.slice(0, currentIndex);
