@@ -173,34 +173,47 @@ const synthesizerMachine = createMachine({
   },
 
   actions: {
-    pushTask: assign(({ queue, nextTaskID }) => {
-      const newTaskProps = {
-        id: nextTaskID, status: PENDING, priority: 2, sequence: '', length: 0, createdAt: Date.now(), taskEndTime: 0,
-      };
-      const priority = getRandomIntegerInRange(1, 4);
-      // const newTask = { ...newTaskProps, priority, ...getRandomSequence(6, 13) };
-      const newTask = { ...newTaskProps, priority, ...getRandomSequence() };
-      queue.push(newTask);
-      return { queue, nextTaskID: nextTaskID + 1 };
+    pushTask: assign({
+      queue: ({ queue, nextTaskID }) => {
+        const newTaskProps = {
+          id: nextTaskID, status: PENDING, priority: 2, sequence: '', length: 0, createdAt: Date.now(), taskEndTime: 0,
+        };
+        const priority = getRandomIntegerInRange(1, 4);
+        // const newTask = { ...newTaskProps, priority, ...getRandomSequence(6, 13) };
+        const newTask = { ...newTaskProps, priority, ...getRandomSequence() };
+        queue.push(newTask);
+        return queue;
+      },
+      nextTaskID: ({ nextTaskID }) => nextTaskID + 1,
     }),
 
-    sortTasks: assign(({ queue }) => {
-      queue.sort((a, b) => b.priority - a.priority);
-      return { queue };
+    sortTasks: assign({
+      queue: ({ queue }) => {
+        queue.sort((a, b) => {
+          if (b.status === PROCESSING) return +1;
+          if (a.status === PROCESSING) return -1;
+          return b.priority - a.priority;
+        });
+        return queue;
+      },
     }),
 
-    prepareCurrentTask: assign(({ queue }) => {
-      const currentTask = queue.find((task) => (PENDING === task.status));
-      if (undefined === currentTask) throw Error("prepareCurrentTask: can't find pending task!");
-      currentTask.status = PROCESSING;
-      currentTask.elementsLeft = currentTask.length;
-      return { currentTask };
+    prepareCurrentTask: assign({
+      currentTask: ({ queue }) => {
+        const currentTask = queue.find((task) => (PENDING === task.status));
+        if (undefined === currentTask) throw Error("prepareCurrentTask: can't find pending task!");
+        currentTask.status = PROCESSING;
+        currentTask.elementsLeft = currentTask.length;
+        return currentTask;
+      },
     }),
 
-    decrementElementsLeft: assign((context) => {
-      const { currentTask } = context;
-      currentTask.elementsLeft -= 1;
-      return { currentTask };
+    decrementElementsLeft: assign({
+      currentTask: (context) => {
+        const { currentTask } = context;
+        currentTask.elementsLeft -= 1;
+        return currentTask;
+      },
     }),
 
     moveToCompleted: assign((context) => {
@@ -223,7 +236,6 @@ const synthesizerMachine = createMachine({
 
     resetTasksCompletedInRow: assign({ tasksCompletedInRow: 0 }),
 
-    // FIXME пока самая первая задача обрабатывается у остальных (не всех, а что ближе к ней) постоянно растет taskEndTime
     calculateEstimatedTime: assign(({ queue, tasksCompletedInRow }) => {
       if (!queue.length) return { allTasksEstimatedTime: 0 };
       if (TASKS_BEFORE_MAINTENANCE === tasksCompletedInRow) return {}; // synthesizer on maintenance
@@ -245,7 +257,7 @@ const synthesizerMachine = createMachine({
 
         taskEstimatedTime = newAccTime + maintenancesTime;
         taskEndTime = Date.now() + taskEstimatedTime;
-        Object.assign(task, { taskEndTime }); //
+        Object.assign(task, { taskEndTime }); // //
 
         return newAccTime;
       }, 0);
