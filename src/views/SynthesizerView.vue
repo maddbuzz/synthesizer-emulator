@@ -15,18 +15,28 @@ const { queue } = props.state.context;
 </script>
 
 <template>
-  <div>
-    <div class="text-center">Synthesizer state: {{ getSynthesizerStateNameString }}</div>
-    <v-col class="text-center text-h5">
-      <span class="blue white--text">{{ splitCurrentSequence[0] }}</span>
-      <span class="red white--text">{{ splitCurrentSequence[1] }}</span>
-      <span class="blue--text">{{ splitCurrentSequence[2] }}</span>
-    </v-col>
-    <div class="text-center">End time of all tasks: {{ getAllTasksEndTimeString }} ({{ getAllTasksEstimatedTime }} seconds
-      left)</div>
-    <task-input :send="send" />
-    <tasks-table :additionalHeaders="additionalHeaders" :tasks="queue" :itemsPerPage="10" />
-  </div>
+  <v-container>
+    <v-row class="text-center">
+      <v-col cols="12">
+        <div class="text-center">Synthesizer state: {{ getSynthesizerStateNameString }}</div>
+        <span class="text-h5 blue white--text">{{ splitCurrentSequence[0] }}</span>
+        <span class="text-h5 red white--text">{{ splitCurrentSequence[1] }}</span>
+        <span class="text-h5 blue--text">{{ splitCurrentSequence[2] }}</span>
+        <div class="text-center">End time of all tasks: {{ getAllTasksEndTimeString }} ({{ getAllTasksEstimatedTime }}
+          seconds left)</div>
+      </v-col>
+    </v-row>
+    <v-row justify="center">
+      <v-col cols="6">
+        <task-input :send="send" />
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col cols="12">
+        <tasks-table :additionalHeaders="additionalHeaders" :tasks="queue" :itemsPerPage="10" />
+      </v-col>
+    </v-row>
+  </v-container>
 </template>
 
 <script>
