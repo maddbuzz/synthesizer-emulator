@@ -179,7 +179,7 @@ const synthesizerMachine = createMachine({
       };
       const priority = getRandomIntegerInRange(1, 4);
       // const newTask = { ...newTaskProps, priority, ...getRandomSequence(6, 13) };
-      const newTask = { ...newTaskProps, priority, ...getRandomSequence(121) };
+      const newTask = { ...newTaskProps, priority, ...getRandomSequence() };
       queue.push(newTask);
       return { queue, nextTaskID: nextTaskID + 1 };
     }),
@@ -223,9 +223,10 @@ const synthesizerMachine = createMachine({
 
     resetTasksCompletedInRow: assign({ tasksCompletedInRow: 0 }),
 
+    // FIXME пока самая первая задача обрабатывается у остальных (не всех, а что ближе к ней) постоянно растет taskEndTime
     calculateEstimatedTime: assign(({ queue, tasksCompletedInRow }) => {
       if (!queue.length) return { allTasksEstimatedTime: 0 };
-      if (TASKS_BEFORE_MAINTENANCE === tasksCompletedInRow) return {}; // synthesizer on maintenance?
+      if (TASKS_BEFORE_MAINTENANCE === tasksCompletedInRow) return {}; // synthesizer on maintenance
 
       let taskEstimatedTime = 0;
       let taskEndTime = 0;
@@ -244,7 +245,7 @@ const synthesizerMachine = createMachine({
 
         taskEstimatedTime = newAccTime + maintenancesTime;
         taskEndTime = Date.now() + taskEstimatedTime;
-        Object.assign(task, { taskEndTime }); // ?
+        Object.assign(task, { taskEndTime }); //
 
         return newAccTime;
       }, 0);

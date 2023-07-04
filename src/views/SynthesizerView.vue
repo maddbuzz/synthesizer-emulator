@@ -16,12 +16,12 @@ const { queue } = props.state.context;
 <template>
   <div>
     <div>Synthesizer state: {{ getSynthesizerStateNameString }}</div>
-    <div>End time of all tasks: {{ getAllTasksEndTimeString }} ({{ getAllTasksEstimatedTimeString }} seconds left)</div>
+    <div>End time of all tasks: {{ getAllTasksEndTimeString }} ({{ getAllTasksEstimatedTime }} seconds left)</div>
     <v-btn elevation="4" color="accent" rounded block @click="send('ADD_NEW_TASK')">
       Add random task
     </v-btn>
-    <tasks-table :additionalHeaders="additionalHeaders" :tasks="queue" :itemsPerPage="5" />
-    <v-col class="text-center text-h5" cols="12">
+    <tasks-table :additionalHeaders="additionalHeaders" :tasks="queue" :itemsPerPage="10" />
+    <v-col class="text-center text-h5">
       <!-- <span class="red white--text">{{ splitCurrentSequence[0] }}</span> -->
       <!-- <span class="purple white--text">{{ splitCurrentSequence[1] }}</span> -->
       <!-- <span class="blue blue--text text--lighten-5">{{ splitCurrentSequence[2] }}</span> -->
@@ -46,7 +46,7 @@ export default {
       if (!allTasksEndTime) return '';
       return (new Date(allTasksEndTime)).toLocaleString('ru-RU');
     },
-    getAllTasksEstimatedTimeString() {
+    getAllTasksEstimatedTime() {
       const { allTasksEstimatedTime } = this.state.context;
       return allTasksEstimatedTime / 1000;
     },
@@ -57,14 +57,12 @@ export default {
     },
     splitCurrentSequence() {
       const { currentTask } = this.state.context;
-      if (!currentTask.sequence) return ['', '', ''];
+      if (!Object.hasOwn(currentTask, 'elementsLeft')) return ['', '', ''];
       const { sequence, length, elementsLeft } = currentTask;
-      // console.log('length, elementsLeft', length, elementsLeft);
       const currentIndex = length - 1 - elementsLeft;
       const completed = sequence.slice(0, currentIndex);
       const processing = sequence.slice(currentIndex, currentIndex + 1);
       const pending = sequence.slice(currentIndex + 1);
-      // console.log([completed, processing, pending]);
       return [completed, processing, pending];
     },
   },
