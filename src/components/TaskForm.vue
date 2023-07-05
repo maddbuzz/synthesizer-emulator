@@ -80,7 +80,7 @@ export default {
       const { $model: pri } = this.$v.select;
       const sequence = seq.toUpperCase();
       const priority = this.priorities.indexOf(pri) + 1;
-      this.send('ADD_NEW_TASK', { sequence, priority });
+      this.send('CREATE_TASK', { sequence, priority });
     },
     randomizeTask() {
       const { sequence } = getRandomSequence();

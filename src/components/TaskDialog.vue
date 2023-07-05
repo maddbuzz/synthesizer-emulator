@@ -106,7 +106,7 @@ export default {
       const sequence = seq.toUpperCase();
       const priority = this.priorities.indexOf(pri) + 1;
       // console.log('this.state.context.nextTaskID', this.state.context.nextTaskID);
-      this.send('ADD_NEW_TASK', { sequence, priority });
+      this.send('CREATE_TASK', { sequence, priority });
     },
     randomizeTask() {
       const { sequence } = getRandomSequence();

@@ -116,36 +116,36 @@ const synthesizerMachine = createMachine({
       states: {
         waiting: {
           on: {
-            ADD_NEW_TASK: {
+            CREATE_TASK: {
               // actions: [(context, event) => console.log(event)],
               target: 'taskEnqueueing',
             },
-            EDIT_TASK: {
-              target: 'taskUpdating',
-              cond: 'taskPending',
-            },
-            DELETE_TASK: {
-              target: 'taskDeleting',
-              cond: 'taskPending',
-            },
+            UPDATE_TASK: [
+              {
+                target: 'sortByPriorities',
+                cond: 'taskPending',
+                actions: 'updateTask',
+              },
+              {
+                target: 'waiting',
+                internal: false,
+              },
+            ],
+            DELETE_TASK: [
+              {
+                target: 'waiting',
+                cond: 'taskPending',
+                actions: 'deleteTask',
+                internal: false,
+              },
+              {},
+            ],
           },
         },
         taskEnqueueing: {
           entry: 'pushTask',
           always: {
             target: 'sortByPriorities',
-          },
-        },
-        taskUpdating: {
-          entry: 'editTask',
-          always: {
-            target: 'sortByPriorities',
-          },
-        },
-        taskDeleting: {
-          entry: 'deleteTask',
-          always: {
-            target: 'waiting',
           },
         },
         sortByPriorities: {
@@ -277,7 +277,7 @@ const synthesizerMachine = createMachine({
     }),
 
     // TODO:
-    editTask: () => console.log('editTask'),
+    updateTask: () => console.log('updateTask'),
     deleteTask: () => console.log('deleteTask'),
   },
 
