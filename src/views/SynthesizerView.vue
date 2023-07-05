@@ -1,7 +1,7 @@
 <script setup>
 import _snakeCase from 'lodash/snakeCase';
 import TasksTable from '../components/TasksTable.vue';
-import TaskDialog from '../components/TaskDialog.vue';
+import AddTaskDialog from '../components/AddTaskDialog.vue';
 
 const props = defineProps({
   state: Object,
@@ -24,7 +24,7 @@ const { queue } = props.state.context;
         <span class="text-h6 blue--text">{{ splitCurrentSequence[2] }}</span>
         <div class="text-center">End time of all tasks: {{ getAllTasksEndTimeString }} ({{ getAllTasksEstimatedTime }}
           seconds left)</div>
-        <task-dialog class="mt-3" :state="state" :send="send" />
+        <add-task-dialog class="mt-3" :state="state" :send="send" />
       </v-col>
     </v-row>
     <v-row>
@@ -41,7 +41,7 @@ export default {
 
   components: {
     TasksTable,
-    TaskDialog,
+    AddTaskDialog,
   },
 
   computed: {

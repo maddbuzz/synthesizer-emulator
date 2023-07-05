@@ -32,7 +32,7 @@ defineProps({
 
 <script>
 export default {
-  name: 'TaskDialog',
+  name: 'AddTaskDialog',
 
   components: {
     TaskForm,
