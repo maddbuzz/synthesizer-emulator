@@ -3,7 +3,7 @@ import { validationMixin } from 'vuelidate';
 import { required, minLength, maxLength } from 'vuelidate/lib/validators';
 
 import { getRandomIntegerInRange } from '../math';
-import { allowedNucleotides, getRandomSequence } from '../nucleotides-synthesizer-machine';
+import { PRIORITY_NAMES, allowedNucleotides, getRandomSequence } from '../nucleotides-synthesizer-machine';
 
 defineProps({
   send: Function,
@@ -42,12 +42,8 @@ export default {
 
   data: () => ({
     sequence: '',
-    select: 'Average', // null,
-    priorities: [
-      'Low',
-      'Average',
-      'Critical',
-    ],
+    select: PRIORITY_NAMES[2], // null,
+    priorities: Object.values(PRIORITY_NAMES),
   }),
 
   computed: {
@@ -95,7 +91,7 @@ export default {
     clear() {
       this.$v.$reset();
       this.sequence = '';
-      this.select = 'Average'; // null;
+      this.select = PRIORITY_NAMES['2']; // null;
     },
   },
 };

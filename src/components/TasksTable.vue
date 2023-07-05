@@ -1,4 +1,6 @@
 <script setup>
+import { PRIORITY_NAMES } from '../nucleotides-synthesizer-machine';
+
 defineProps({
   additionalHeaders: Array,
   tasks: Array,
@@ -52,12 +54,9 @@ export default {
       }
     },
     getPriorityName(priority) {
-      switch (priority) {
-        case 1: return 'Low';
-        case 2: return 'Average';
-        case 3: return 'Critical';
-        default: throw Error(`Unknown priority ${priority}!`);
-      }
+      const name = PRIORITY_NAMES[priority];
+      if (!name) throw Error(`Unknown priority ${priority}!`);
+      return name;
     },
     getTimeString(timestamp) {
       if (!timestamp) return '';

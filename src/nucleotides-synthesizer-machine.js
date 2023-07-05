@@ -6,11 +6,18 @@ const ON_MAINTENANCE_TIME = 5000;
 const ELEMENT_SYNTHESIS_TIME = 1000;
 const ESTIMATED_TIME_RECALCULATION_INTERVAL = 1000;
 
-// Task statuses:
-const PENDING = 'PENDING';
-const PROCESSING = 'PROCESSING';
-const COMPLETED = 'COMPLETED';
-// const EDITING = 'EDITING';
+const TASK_STATUSES = Object.freeze({
+  PENDING: 'Pending',
+  PROCESSING: 'Processing',
+  COMPLETED: 'Completed',
+  UPDATING: 'Updating',
+});
+
+export const PRIORITY_NAMES = Object.freeze({
+  1: 'Low',
+  2: 'Average',
+  3: 'Critical',
+});
 
 export const allowedNucleotides = 'ATGC';
 
@@ -114,7 +121,7 @@ const synthesizerMachine = createMachine({
               target: 'taskEnqueueing',
             },
             EDIT_TASK: {
-              target: 'taskEditing',
+              target: 'taskUpdating',
               cond: 'taskPending',
             },
             DELETE_TASK: {
@@ -129,7 +136,7 @@ const synthesizerMachine = createMachine({
             target: 'sortByPriorities',
           },
         },
-        taskEditing: {
+        taskUpdating: {
           entry: 'editTask',
           always: {
             target: 'sortByPriorities',
@@ -168,7 +175,7 @@ const synthesizerMachine = createMachine({
   },
 }, {
   guards: {
-    someTaskPending: ({ queue }) => queue.some((task) => (PENDING === task.status)),
+    someTaskPending: ({ queue }) => queue.some((task) => (TASK_STATUSES.PENDING === task.status)),
     elementsLeft: ({ currentTask }) => (currentTask.elementsLeft > 0),
     manyTasksCompletedInRow: ({ tasksCompletedInRow }) => (tasksCompletedInRow >= TASKS_BEFORE_MAINTENANCE),
     // TODO:
@@ -179,7 +186,7 @@ const synthesizerMachine = createMachine({
     pushTask: assign({
       queue: ({ queue, nextTaskID }, event) => {
         const newTaskProps = {
-          id: nextTaskID, status: PENDING, priority: 2, sequence: '', length: 0, createdAt: Date.now(), taskEndTime: 0,
+          id: nextTaskID, status: TASK_STATUSES.PENDING, priority: 2, sequence: '', length: 0, createdAt: Date.now(), taskEndTime: 0,
         };
         const { priority, sequence } = event;
         const newTask = {
@@ -194,8 +201,8 @@ const synthesizerMachine = createMachine({
     sortTasks: assign({
       queue: ({ queue }) => {
         queue.sort((a, b) => {
-          if (b.status === PROCESSING) return +1;
-          if (a.status === PROCESSING) return -1;
+          if (b.status === TASK_STATUSES.PROCESSING) return +1;
+          if (a.status === TASK_STATUSES.PROCESSING) return -1;
           return b.priority - a.priority;
         });
         return queue;
@@ -204,9 +211,9 @@ const synthesizerMachine = createMachine({
 
     prepareCurrentTask: assign({
       currentTask: ({ queue }) => {
-        const currentTask = queue.find((task) => (PENDING === task.status));
+        const currentTask = queue.find((task) => (TASK_STATUSES.PENDING === task.status));
         if (undefined === currentTask) throw Error("prepareCurrentTask: can't find pending task!");
-        currentTask.status = PROCESSING;
+        currentTask.status = TASK_STATUSES.PROCESSING;
         currentTask.elementsLeft = currentTask.length;
         return currentTask;
       },
@@ -226,7 +233,7 @@ const synthesizerMachine = createMachine({
       } = context;
       const index = queue.indexOf(currentTask);
       if (index === -1) throw Error("moveToCompleted: can't find currentTask!");
-      currentTask.status = COMPLETED;
+      currentTask.status = TASK_STATUSES.COMPLETED;
       currentTask.completedAt = Date.now();
       // delete currentTask.taskEndTime;
       delete currentTask.length;
@@ -249,7 +256,7 @@ const synthesizerMachine = createMachine({
 
       let tasksNumber = 0;
       queue.reduce((accTime, task) => {
-        if ((PENDING !== task.status) && (PROCESSING !== task.status)) return accTime;
+        if ((TASK_STATUSES.PENDING !== task.status) && (TASK_STATUSES.PROCESSING !== task.status)) return accTime;
         tasksNumber += 1;
         const taskTime = (undefined !== task.elementsLeft ? task.elementsLeft : task.length) * ELEMENT_SYNTHESIS_TIME;
         const newAccTime = accTime + taskTime;
