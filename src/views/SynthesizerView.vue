@@ -1,7 +1,6 @@
 <script setup>
 import _snakeCase from 'lodash/snakeCase';
 import TasksTable from '../components/TasksTable.vue';
-// import TaskForm from '../components/TaskForm.vue';
 import TaskDialog from '../components/TaskDialog.vue';
 
 const props = defineProps({
@@ -28,11 +27,6 @@ const { queue } = props.state.context;
         <task-dialog class="mt-3" :state="state" :send="send" />
       </v-col>
     </v-row>
-    <!-- <v-row justify="center" class="text-center">
-      <v-col cols="8">
-        <task-form :send="send" />
-      </v-col>
-    </v-row> -->
     <v-row>
       <v-col cols="12">
         <tasks-table :additionalHeaders="additionalHeaders" :tasks="queue" :itemsPerPage="10" />
@@ -47,7 +41,6 @@ export default {
 
   components: {
     TasksTable,
-    // TaskForm,
     TaskDialog,
   },
 

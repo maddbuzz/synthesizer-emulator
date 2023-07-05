@@ -19,9 +19,9 @@ export const PRIORITY_NAMES = Object.freeze({
   3: 'Critical',
 });
 
-export const allowedNucleotides = 'ATGC';
+export const NUCLEOTIDES = 'ATGC';
 
-const getRandomNucleotide = (nucleotides = allowedNucleotides) => nucleotides[getRandomIntegerInRange(0, nucleotides.length)];
+const getRandomNucleotide = (nucleotides = NUCLEOTIDES) => nucleotides[getRandomIntegerInRange(0, nucleotides.length)];
 export const getRandomSequence = (minLengthInclusive = 6, maxLengthExclusive = 121) => {
   const length = getRandomIntegerInRange(minLengthInclusive, maxLengthExclusive);
   const sequence = Array

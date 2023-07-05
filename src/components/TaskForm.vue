@@ -3,22 +3,28 @@ import { validationMixin } from 'vuelidate';
 import { required, minLength, maxLength } from 'vuelidate/lib/validators';
 
 import { getRandomIntegerInRange } from '../math';
-import { PRIORITY_NAMES, allowedNucleotides, getRandomSequence } from '../nucleotides-synthesizer-machine';
+import { PRIORITY_NAMES, NUCLEOTIDES, getRandomSequence } from '../nucleotides-synthesizer-machine';
 
+// const props =
 defineProps({
+  taskID: Number,
+  submitName: String,
   send: Function,
+  eventName: String,
 });
+// console.log(props);
 </script>
 
 <template>
   <form class="pa-2 elevation-4">
+    <v-text-field v-model="thisTaskID" label="ID" disabled></v-text-field>
     <v-text-field v-model="sequence" :error-messages="sequenceErrors" :counter="120" label="Sequence" required
       @input="$v.sequence.$touch()" @blur="$v.sequence.$touch()"></v-text-field>
     <v-select v-model="select" :items="priorities" :error-messages="selectErrors" label="Priority" required
       @change="$v.select.$touch()" @blur="$v.select.$touch()"></v-select>
 
-    <v-btn class="mr-3" @click="addTask">
-      add new task
+    <v-btn class="mr-3" @click="submit">
+      {{ submitName }}
     </v-btn>
     <v-btn class="mr-3" @click="randomizeTask">
       randomize
@@ -58,8 +64,8 @@ export default {
       if (!this.$v.sequence.$dirty) return errors;
 
       const { $model: seq } = this.$v.sequence;
-      if ([...seq.toUpperCase()].some((el) => !allowedNucleotides.includes(el))) {
-        errors.push(`Sequence must contain only ${[...allowedNucleotides]}`);
+      if ([...seq.toUpperCase()].some((el) => !NUCLEOTIDES.includes(el))) {
+        errors.push(`Sequence must contain only ${[...NUCLEOTIDES]}`);
       }
 
       if (!this.$v.sequence.minLength) errors.push('Sequence must be at least 6 characters long');
@@ -67,20 +73,21 @@ export default {
       if (!this.$v.sequence.required) errors.push('Sequence is required');
       return errors;
     },
+    thisTaskID() {
+      // console.log('this.taskID', this.taskID);
+      return this.taskID;
+    },
   },
 
   methods: {
-    // submit() {
-    //   this.$v.$touch();
-    // },
-    addTask() {
+    submit() {
       this.$v.$touch();
       if (this.sequenceErrors.length || this.selectErrors.length) return;
       const { $model: seq } = this.$v.sequence;
       const { $model: pri } = this.$v.select;
       const sequence = seq.toUpperCase();
       const priority = this.priorities.indexOf(pri) + 1;
-      this.send('CREATE_TASK', { sequence, priority });
+      this.send(this.eventName, { id: this.taskID, sequence, priority });
     },
     randomizeTask() {
       const { sequence } = getRandomSequence();
