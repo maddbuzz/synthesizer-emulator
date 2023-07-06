@@ -4,8 +4,8 @@ import TasksTable from '../components/TasksTable.vue';
 import AddTaskDialog from '../components/AddTaskDialog.vue';
 
 const props = defineProps({
-  state: Object,
-  send: Function,
+  state: { type: Object, required: true },
+  send: { type: Function, required: true },
 });
 
 const additionalHeaders = [
@@ -29,7 +29,7 @@ const { queue } = props.state.context;
     </v-row>
     <v-row>
       <v-col cols="12">
-        <tasks-table :additionalHeaders="additionalHeaders" :tasks="queue" :itemsPerPage="10" />
+        <tasks-table :send="send" :additionalHeaders="additionalHeaders" :tasks="queue" :itemsPerPage="10" />
       </v-col>
     </v-row>
   </v-container>

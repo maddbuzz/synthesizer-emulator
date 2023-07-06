@@ -5,23 +5,22 @@ import { required, minLength, maxLength } from 'vuelidate/lib/validators';
 import { getRandomIntegerInRange } from '../math';
 import { PRIORITY_NAMES, NUCLEOTIDES, getRandomSequence } from '../nucleotides-synthesizer-machine';
 
-// const props =
 defineProps({
-  taskID: Number,
-  submitName: String,
-  send: Function,
-  eventName: String,
+  taskID: { type: Number, required: true },
+  taskForEdit: { type: Object, default: null },
+  submitName: { type: String, required: true },
+  send: { type: Function, required: true },
+  eventName: { type: String, required: true },
 });
-// console.log(props);
 </script>
 
 <template>
   <form class="pa-2 elevation-4">
-    <v-text-field v-model="thisTaskID" label="ID" disabled></v-text-field>
-    <v-text-field v-model="sequence" :error-messages="sequenceErrors" :counter="120" label="Sequence" required
-      @input="$v.sequence.$touch()" @blur="$v.sequence.$touch()"></v-text-field>
-    <v-select v-model="select" :items="priorities" :error-messages="selectErrors" label="Priority" required
-      @change="$v.select.$touch()" @blur="$v.select.$touch()"></v-select>
+    <v-text-field v-model="idModel" label="ID" disabled></v-text-field>
+    <v-text-field v-model="sequenceModel" :error-messages="sequenceErrors" :counter="120" label="Sequence" required
+      @input="$v.sequenceModel.$touch()" @blur="$v.sequenceModel.$touch()"></v-text-field>
+    <v-select v-model="priorityModel" :items="priorities" :error-messages="priorityErrors" label="Priority" required
+      @change="$v.priorityModel.$touch()" @blur="$v.priorityModel.$touch()"></v-select>
 
     <v-btn class="mr-3" @click="submit">
       {{ submitName }}
@@ -42,63 +41,81 @@ export default {
   mixins: [validationMixin],
 
   validations: {
-    sequence: { required, minLength: minLength(6), maxLength: maxLength(120) },
-    select: { required },
+    sequenceModel: { required, minLength: minLength(6), maxLength: maxLength(120) },
+    priorityModel: { required },
   },
 
   data: () => ({
-    sequence: '',
-    select: PRIORITY_NAMES[2], // null,
+    sequence: null,
+    priority: null,
     priorities: Object.values(PRIORITY_NAMES),
   }),
 
   computed: {
-    selectErrors() {
+    priorityErrors() {
       const errors = [];
-      if (!this.$v.select.$dirty) return errors;
-      if (!this.$v.select.required) errors.push('Priority is required');
+      if (!this.$v.priorityModel.$dirty) return errors;
+      if (!this.$v.priorityModel.required) errors.push('Priority is required');
       return errors;
     },
     sequenceErrors() {
       const errors = [];
-      if (!this.$v.sequence.$dirty) return errors;
+      if (!this.$v.sequenceModel.$dirty) return errors;
 
-      const { $model: seq } = this.$v.sequence;
-      if ([...seq.toUpperCase()].some((el) => !NUCLEOTIDES.includes(el))) {
+      const { $model: sequence } = this.$v.sequenceModel;
+      if ([...sequence.toUpperCase()].some((el) => !NUCLEOTIDES.includes(el))) {
         errors.push(`Sequence must contain only ${[...NUCLEOTIDES]}`);
       }
 
-      if (!this.$v.sequence.minLength) errors.push('Sequence must be at least 6 characters long');
-      if (!this.$v.sequence.maxLength) errors.push('Sequence must be at most 120 characters long');
-      if (!this.$v.sequence.required) errors.push('Sequence is required');
+      if (!this.$v.sequenceModel.minLength) errors.push('Sequence must be at least 6 characters long');
+      if (!this.$v.sequenceModel.maxLength) errors.push('Sequence must be at most 120 characters long');
+      if (!this.$v.sequenceModel.required) errors.push('Sequence is required');
       return errors;
     },
-    thisTaskID() {
-      // console.log('this.taskID', this.taskID);
+
+    idModel() {
       return this.taskID;
+    },
+    sequenceModel: {
+      get() {
+        if (this.sequence === null) return this.taskForEdit ? this.taskForEdit.sequence : '';
+        return this.sequence;
+      },
+      set(newValue) {
+        this.sequence = newValue;
+      },
+    },
+    priorityModel: {
+      get() {
+        if (this.priority === null) return this.taskForEdit ? PRIORITY_NAMES[this.taskForEdit.priority] : PRIORITY_NAMES[2];
+        return this.priority;
+      },
+      set(newValue) {
+        this.priority = newValue;
+      },
     },
   },
 
   methods: {
     submit() {
       this.$v.$touch();
-      if (this.sequenceErrors.length || this.selectErrors.length) return;
-      const { $model: seq } = this.$v.sequence;
-      const { $model: pri } = this.$v.select;
-      const sequence = seq.toUpperCase();
-      const priority = this.priorities.indexOf(pri) + 1;
+      if (this.sequenceErrors.length || this.priorityErrors.length) return;
+      let { $model: sequence } = this.$v.sequenceModel;
+      let { $model: priority } = this.$v.priorityModel;
+      sequence = sequence.toUpperCase();
+      priority = this.priorities.indexOf(priority) + 1;
       this.send(this.eventName, { id: this.taskID, sequence, priority });
     },
     randomizeTask() {
       const { sequence } = getRandomSequence();
       const priorityIndex = getRandomIntegerInRange(0, 3);
-      this.sequence = sequence;
-      this.select = this.priorities[priorityIndex];
+      this.sequenceModel = sequence;
+      this.priorityModel = this.priorities[priorityIndex];
     },
     clear() {
       this.$v.$reset();
-      this.sequence = '';
-      this.select = PRIORITY_NAMES['2']; // null;
+      this.sequenceModel = '';
+      this.priorityModel = PRIORITY_NAMES['2']; // null;
     },
   },
 };

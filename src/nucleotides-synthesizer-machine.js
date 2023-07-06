@@ -6,11 +6,12 @@ const ON_MAINTENANCE_TIME = 5000;
 const ELEMENT_SYNTHESIS_TIME = 1000;
 const ESTIMATED_TIME_RECALCULATION_INTERVAL = 1000;
 
-const TASK_STATUSES = Object.freeze({
+export const TASK_STATUSES = Object.freeze({
   PENDING: 'Pending',
   PROCESSING: 'Processing',
   COMPLETED: 'Completed',
-  UPDATING: 'Updating',
+  EDITING: 'Editing',
+  WAITING_DELETE_CONFIRM: 'Waiting for deletion confirmation',
 });
 
 export const PRIORITY_NAMES = Object.freeze({
@@ -120,26 +121,18 @@ const synthesizerMachine = createMachine({
               // actions: [(context, event) => console.log(event)],
               target: 'taskEnqueueing',
             },
-            UPDATE_TASK: [
+
+            EDIT_TASK: [
               {
-                target: 'sortByPriorities',
+                target: 'taskEditing',
                 cond: 'taskPending',
-                actions: 'updateTask',
               },
               {
                 target: 'waiting',
                 internal: false,
               },
             ],
-            DELETE_TASK: [
-              {
-                target: 'waiting',
-                cond: 'taskPending',
-                actions: 'deleteTask',
-                internal: false,
-              },
-              {},
-            ],
+
           },
         },
         taskEnqueueing: {
@@ -152,6 +145,19 @@ const synthesizerMachine = createMachine({
           entry: 'sortTasks',
           always: {
             target: 'waiting',
+          },
+        },
+        taskEditing: {
+          entry: 'setEditingStatus',
+          on: {
+            EDIT_CANCELED: {
+              target: 'waiting',
+              actions: 'setPendingStatus',
+            },
+            UPDATE_TASK: {
+              target: 'sortByPriorities',
+              actions: 'updateTask',
+            },
           },
         },
       },
@@ -175,11 +181,15 @@ const synthesizerMachine = createMachine({
   },
 }, {
   guards: {
-    someTaskPending: ({ queue }) => queue.some((task) => (TASK_STATUSES.PENDING === task.status)),
     elementsLeft: ({ currentTask }) => (currentTask.elementsLeft > 0),
     manyTasksCompletedInRow: ({ tasksCompletedInRow }) => (tasksCompletedInRow >= TASKS_BEFORE_MAINTENANCE),
-    // TODO:
-    taskPending: (_context, _event) => false,
+    someTaskPending: ({ queue }) => queue.some((task) => (TASK_STATUSES.PENDING === task.status)),
+    taskPending: ({ queue }, event) => {
+      const { id } = event;
+      const task = queue.find((t) => t.id === id);
+      if (!task) throw Error(`taskPending can't find task with id === ${id}`);
+      return TASK_STATUSES.PENDING === task.status;
+    },
   },
 
   actions: {
@@ -196,6 +206,39 @@ const synthesizerMachine = createMachine({
         return queue;
       },
       nextTaskID: ({ nextTaskID }) => nextTaskID + 1,
+    }),
+
+    setPendingStatus: assign({
+      queue: ({ queue }, event) => {
+        console.log('setPendingStatus', event);
+        const { id } = event;
+        const task = queue.find((t) => t.id === id);
+        if (!task) throw Error(`setPendingStatus can't find task with id === ${id}`);
+        Object.assign(task, { status: TASK_STATUSES.PENDING });
+        return queue;
+      },
+    }),
+
+    setEditingStatus: assign({
+      queue: ({ queue }, event) => {
+        console.log('setEditingStatus', event);
+        const { id } = event;
+        const task = queue.find((t) => t.id === id);
+        if (!task) throw Error(`setEditingStatus can't find task with id === ${id}`);
+        Object.assign(task, { status: TASK_STATUSES.EDITING });
+        return queue;
+      },
+    }),
+
+    updateTask: assign({
+      queue: ({ queue }, event) => {
+        console.log('updateTask', event);
+        const { id, priority, sequence } = event;
+        const task = queue.find((t) => t.id === id);
+        if (!task) throw Error(`updateTask can't find task with id === ${id}`);
+        Object.assign(task, { priority, sequence, status: TASK_STATUSES.PENDING });
+        return queue;
+      },
     }),
 
     sortTasks: assign({
@@ -235,7 +278,6 @@ const synthesizerMachine = createMachine({
       if (index === -1) throw Error("moveToCompleted: can't find currentTask!");
       currentTask.status = TASK_STATUSES.COMPLETED;
       currentTask.completedAt = Date.now();
-      // delete currentTask.taskEndTime;
       delete currentTask.length;
       delete currentTask.elementsLeft;
       completedTasks.push(currentTask);
@@ -277,8 +319,7 @@ const synthesizerMachine = createMachine({
     }),
 
     // TODO:
-    updateTask: () => console.log('updateTask'),
-    deleteTask: () => console.log('deleteTask'),
+    // deleteTask: () => console.log('deleteTask'),
   },
 
   delays: { // can be a constant or a function: (context, event) => ...

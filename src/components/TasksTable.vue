@@ -1,10 +1,12 @@
 <script setup>
-import { PRIORITY_NAMES } from '../nucleotides-synthesizer-machine';
+import { TASK_STATUSES, PRIORITY_NAMES } from '../nucleotides-synthesizer-machine';
+import EditTaskDialog from './EditTaskDialog.vue';
 
 defineProps({
-  additionalHeaders: Array,
-  tasks: Array,
-  itemsPerPage: Number,
+  send: { type: Function, required: true },
+  additionalHeaders: { type: Array, default: () => [] },
+  tasks: { type: Array, required: true },
+  itemsPerPage: { type: Number, default: 5 },
 });
 </script>
 
@@ -42,6 +44,9 @@ defineProps({
           <template v-slot:item.completedAt="{ item }">
             {{ getTimeString(item.completedAt) }}
           </template>
+          <template v-slot:item.buttons="{ item }">
+            <edit-task-dialog :send="send" :taskForEdit="item" v-if="showEditButton(item)" />
+          </template>
         </v-data-table>
 
       </v-col>
@@ -53,6 +58,10 @@ defineProps({
 export default {
   name: 'TasksTable',
 
+  components: {
+    EditTaskDialog,
+  },
+
   data() {
     return {
       headers: [
@@ -62,7 +71,8 @@ export default {
         { text: 'Sequence', value: 'sequence', sortable: false },
         { text: 'Created at', value: 'createdAt' },
       ].concat(this.additionalHeaders)
-        .map((h) => Object.assign(h, { filter: this.customFilterFor(h.value) })),
+        .map((h) => Object.assign(h, { filter: this.customFilterFor(h.value) }))
+        .concat({ text: '', value: 'buttons', sortable: false }),
 
       items: this.tasks,
 
@@ -133,6 +143,9 @@ export default {
     getTimeString(timestamp) {
       if (!timestamp) return '';
       return (new Date(timestamp)).toLocaleString('ru-RU');
+    },
+    showEditButton(task) {
+      return task.status === TASK_STATUSES.PENDING || task.status === TASK_STATUSES.EDITING; // !!!!!!!!!!!!!!!!!!!!
     },
   },
 };

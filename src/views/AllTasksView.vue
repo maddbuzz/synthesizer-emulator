@@ -2,8 +2,8 @@
 import TasksTable from '../components/TasksTable.vue';
 
 const props = defineProps({
-  state: Object,
-  send: Function,
+  state: { type: Object, required: true },
+  send: { type: Function, required: true },
 });
 
 const additionalHeaders = [
@@ -18,7 +18,7 @@ const allTasks = completedTasks.concat(queue); // shallow copy
   <v-container fluid>
     <v-row>
       <v-col>
-        <tasks-table :additionalHeaders="additionalHeaders" :tasks="allTasks" :itemsPerPage="15" />
+        <tasks-table :send="send" :additionalHeaders="additionalHeaders" :tasks="allTasks" :itemsPerPage="15" />
       </v-col>
     </v-row>
   </v-container>

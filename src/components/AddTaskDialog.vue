@@ -2,14 +2,14 @@
 import TaskForm from './TaskForm.vue';
 
 defineProps({
-  state: Object,
-  send: Function,
+  state: { type: Object, required: true },
+  send: { type: Function, required: true },
 });
 </script>
 
 <template>
   <div>
-    <v-dialog v-model="dialog" width="1250">
+    <v-dialog v-model="showDialog" width="1250">
 
       <template v-slot:activator="{ on, attrs }">
         <v-btn class="blue white--text" v-bind="attrs" v-on="on">
@@ -20,9 +20,14 @@ defineProps({
       <v-card class="text-center" outlined>
         <v-card-title class="text-h6 blue white--text">
           Add task
+          <v-spacer></v-spacer>
+          <v-btn icon dark @click="showDialog = false">
+            <v-icon>mdi-close</v-icon>
+          </v-btn>
         </v-card-title>
 
-        <task-form :taskID="state.context.nextTaskID" submit-name="Create task" :send="send" event-name="CREATE_TASK" />
+        <task-form :taskID="state.context.nextTaskID" :taskForEdit="null" submit-name="Create task" :send="send"
+          event-name="CREATE_TASK" />
 
       </v-card>
 
@@ -39,7 +44,7 @@ export default {
   },
 
   data: () => ({
-    dialog: false, // initial state
+    showDialog: false, // initial state
   }),
 
 };
