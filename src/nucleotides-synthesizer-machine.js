@@ -151,7 +151,7 @@ const synthesizerMachine = createMachine({
           entry: 'setEditingStatus',
           on: {
             EDIT_CANCELED: {
-              target: 'waiting',
+              target: 'sortByPriorities', // !
               actions: 'setPendingStatus',
             },
             UPDATE_TASK: {

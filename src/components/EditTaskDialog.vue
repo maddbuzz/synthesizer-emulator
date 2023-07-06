@@ -22,13 +22,13 @@ defineProps({
         <v-card-title class="text-h6 blue white--text">
           Edit task
           <v-spacer></v-spacer>
-          <v-btn icon dark @click="sendEventCloseDialog">
+          <v-btn icon dark @click="sendCancelEventCloseDialog">
             <v-icon>mdi-close</v-icon>
           </v-btn>
         </v-card-title>
 
-        <task-form :taskID="taskForEdit.id" :taskForEdit="taskForEdit" submit-name="Save task" :send="send"
-          event-name="UPDATE_TASK" />
+        <task-form ref="taskForm" :taskID="taskForEdit.id" :taskForEdit="taskForEdit" submit-name="Save task" :send="send"
+          event-name="UPDATE_TASK" @data-submitted-event="showDialog = false" />
 
       </v-card>
 
@@ -50,12 +50,15 @@ export default {
   watch: {
     // whenever showDialog changes, this function will run
     showDialog(newValue, _oldValue) {
-      if (newValue === true) this.send('EDIT_TASK', { id: this.taskForEdit.id });
+      if (newValue === true) {
+        this.$refs.taskForm?.nullSequenceAndPriority(); // !
+        this.send('EDIT_TASK', { id: this.taskForEdit.id });
+      }
     },
   },
 
   methods: {
-    sendEventCloseDialog() {
+    sendCancelEventCloseDialog() {
       if (this.taskForEdit.status === TASK_STATUSES.EDITING) this.send('EDIT_CANCELED', { id: this.taskForEdit.id });
       this.showDialog = false;
     },

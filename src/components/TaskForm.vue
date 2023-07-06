@@ -105,6 +105,7 @@ export default {
       sequence = sequence.toUpperCase();
       priority = this.priorities.indexOf(priority) + 1;
       this.send(this.eventName, { id: this.taskID, sequence, priority });
+      this.$emit('data-submitted-event'); // , payload);
     },
     randomizeTask() {
       const { sequence } = getRandomSequence();
@@ -116,6 +117,11 @@ export default {
       this.$v.$reset();
       this.sequenceModel = '';
       this.priorityModel = PRIORITY_NAMES['2']; // null;
+    },
+
+    nullSequenceAndPriority() {
+      this.sequence = null;
+      this.priority = null;
     },
   },
 };
