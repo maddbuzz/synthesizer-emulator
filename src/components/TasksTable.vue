@@ -12,25 +12,22 @@ defineProps({
   <div>
     <v-row>
       <v-col>
+
         <div v-for="filter in selectedFilters" v-bind:key="filter.value">
-          <!-- <v-text-field :label="filter.text"></v-text-field> -->
-          <!-- <v-text-field v-model="search" :label="filter.text" @change="onChangeTextField($event, filter.value)"></v-text-field> -->
           <v-text-field :label="filter.text" @change="onChangeTextField($event, filter.value)"></v-text-field>
         </div>
+
       </v-col>
       <v-col>
-        <v-select :items="availableFilters" @change="onChangeSelect($event)"></v-select>
+
+        <v-select :items="availableFilters" @change="onChangeSelect($event)" label="Select filters"></v-select>
+
       </v-col>
     </v-row>
     <v-row>
       <v-col>
-        <!-- <v-data-table :search="search" :custom-filter="customFilter" :headers="headers" :items="items" :items-per-page="itemsPerPage" class="elevation-4"> -->
+
         <v-data-table :headers="headers" :items="items" :items-per-page="itemsPerPage" class="elevation-4">
-
-          <!-- <template v-slot:top>
-            <v-text-field v-model="search" label="Search ???" class="mx-4"></v-text-field>
-          </template> -->
-
           <template v-slot:item.priority="{ item }">
             <v-chip :color="getPriorityColor(item.priority)" dark>
               {{ getPriorityName(item.priority) }}
@@ -46,6 +43,7 @@ defineProps({
             {{ getTimeString(item.completedAt) }}
           </template>
         </v-data-table>
+
       </v-col>
     </v-row>
   </div>
@@ -68,13 +66,21 @@ export default {
 
       items: this.tasks,
 
-      allFilters: [ // TODO need search here ?
-        // { header: 'Select filters' },
-        { search: '', text: 'Status', value: 'status' },
-        { search: '', text: 'Priority', value: 'priority' },
-        { search: '', text: 'Created at', value: 'createdAt' },
-        { search: '', text: 'Estimated end time', value: 'taskEndTime' },
+      allFilters: [
+        {
+          search: '', text: 'Status', value: 'status', method: this.identity,
+        },
+        {
+          search: '', text: 'Priority', value: 'priority', method: this.getPriorityName,
+        },
+        {
+          search: '', text: 'Created at', value: 'createdAt', method: this.getTimeString,
+        },
+        {
+          search: '', text: 'Estimated end time', value: 'taskEndTime', method: this.getTimeString,
+        },
       ],
+
       selectedFilters: [],
     };
   },
@@ -90,11 +96,10 @@ export default {
   },
 
   methods: {
-    onChangeTextField(event, filterValue) {
-      console.log('onChangeTextField(event, filterValue)', event, filterValue);
+    onChangeTextField(text, filterValue) {
       const filter = this.allFilters.find((f) => f.value === filterValue);
       if (!filter) throw Error(`onChangeTextField can't find value ${filterValue}`);
-      filter.search = event;
+      filter.search = text;
     },
     onChangeSelect(value) {
       const newFilter = this.allFilters.find((f) => f.value === value);
@@ -102,16 +107,16 @@ export default {
       this.selectedFilters.push(newFilter);
     },
     customFilterFor(key) {
-      return (value, search, item) => {
+      return (value, _search, _item) => {
         const filter = this.selectedFilters.find((f) => f.value === key);
         if (!filter) return true;
-
-        console.log('key, value, search, item', key, value, search, item);
-        return item[key].includes(filter.search);
-        // return true;
+        return filter.method(value).includes(filter.search);
       };
     },
 
+    identity(value) {
+      return value;
+    },
     getPriorityColor(priority) {
       switch (priority) {
         case 1: return 'blue';
