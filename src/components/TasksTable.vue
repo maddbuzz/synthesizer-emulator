@@ -1,4 +1,5 @@
 <script setup>
+import _debounce from 'lodash/debounce';
 import { TASK_STATUSES, PRIORITY_NAMES } from '../nucleotides-synthesizer-machine';
 import EditTaskDialog from './EditTaskDialog.vue';
 
@@ -16,7 +17,7 @@ defineProps({
       <v-col>
 
         <div v-for="filter in selectedFilters" v-bind:key="filter.value">
-          <v-text-field :label="filter.text" @change="onChangeTextField($event, filter.value)"></v-text-field>
+          <v-text-field :label="filter.text" @input="debouncedOnInputTextField($event, filter.value)"></v-text-field>
         </div>
 
       </v-col>
@@ -78,16 +79,16 @@ export default {
 
       allFilters: [
         {
-          search: '', text: 'Status', value: 'status', method: this.identity,
+          search: '', text: 'Status', value: 'status', slotMethod: this.identity,
         },
         {
-          search: '', text: 'Priority', value: 'priority', method: this.getPriorityName,
+          search: '', text: 'Priority', value: 'priority', slotMethod: this.getPriorityName,
         },
         {
-          search: '', text: 'Created at', value: 'createdAt', method: this.getTimeString,
+          search: '', text: 'Created at', value: 'createdAt', slotMethod: this.getTimeString,
         },
         {
-          search: '', text: 'Estimated end time', value: 'taskEndTime', method: this.getTimeString,
+          search: '', text: 'Estimated end time', value: 'taskEndTime', slotMethod: this.getTimeString,
         },
       ],
 
@@ -105,22 +106,28 @@ export default {
     },
   },
 
+  created() {
+    // https://lodash.com/docs#debounce
+    this.debouncedOnInputTextField = _debounce(this.onInputTextField, 500);
+  },
   methods: {
-    onChangeTextField(text, filterValue) {
+    onInputTextField(text, filterValue) {
       const filter = this.allFilters.find((f) => f.value === filterValue);
-      if (!filter) throw Error(`onChangeTextField can't find value ${filterValue}`);
+      if (!filter) throw Error(`onInputTextField: can't find filterValue ${filterValue}`);
       filter.search = text;
     },
     onChangeSelect(value) {
       const newFilter = this.allFilters.find((f) => f.value === value);
-      if (!newFilter) throw Error(`onChangeSelect can't find value ${value}`);
+      if (!newFilter) throw Error(`onChangeSelect: can't find value ${value}`);
       this.selectedFilters.push(newFilter);
     },
     customFilterFor(key) {
       return (value, _search, _item) => {
         const filter = this.selectedFilters.find((f) => f.value === key);
         if (!filter) return true;
-        return filter.method(value).includes(filter.search);
+        const cellValue = filter.slotMethod(value).toUpperCase();
+        const searchElement = filter.search.toUpperCase();
+        return cellValue.includes(searchElement);
       };
     },
 
@@ -132,20 +139,20 @@ export default {
         case 1: return 'blue';
         case 2: return 'green';
         case 3: return 'red';
-        default: throw Error(`Unknown priority ${priority}!`);
+        default: throw Error(`getPriorityColor: unknown priority ${priority}!`);
       }
     },
     getPriorityName(priority) {
       const name = PRIORITY_NAMES[priority];
-      if (!name) throw Error(`Unknown priority ${priority}!`);
+      if (!name) throw Error(`getPriorityName: unknown priority ${priority}!`);
       return name;
     },
     getTimeString(timestamp) {
       if (!timestamp) return '';
       return (new Date(timestamp)).toLocaleString('ru-RU');
     },
-    showEditButton(task) {
-      return task.status === TASK_STATUSES.PENDING || task.status === TASK_STATUSES.EDITING; // !!!!!!!!!!!!!!!!!!!!
+    showEditButton({ status }) {
+      return status === TASK_STATUSES.PENDING || status === TASK_STATUSES.EDITING; // !!!!!!!!!!!!!!!!!!!!
     },
   },
 };

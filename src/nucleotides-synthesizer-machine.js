@@ -11,7 +11,7 @@ export const TASK_STATUSES = Object.freeze({
   PROCESSING: 'Processing',
   COMPLETED: 'Completed',
   EDITING: 'Editing',
-  WAITING_DELETE_CONFIRM: 'Waiting for deletion confirmation',
+  DELETION_CONFIRMATION: 'Deletion confirmation',
 });
 
 export const PRIORITY_NAMES = Object.freeze({
@@ -148,11 +148,11 @@ const synthesizerMachine = createMachine({
           },
         },
         taskEditing: {
-          entry: 'setEditingStatus',
+          entry: 'updateTaskStatus',
           on: {
             EDIT_CANCELED: {
               target: 'sortByPriorities', // !
-              actions: 'setPendingStatus',
+              actions: 'updateTaskStatus',
             },
             UPDATE_TASK: {
               target: 'sortByPriorities',
@@ -187,7 +187,7 @@ const synthesizerMachine = createMachine({
     taskPending: ({ queue }, event) => {
       const { id } = event;
       const task = queue.find((t) => t.id === id);
-      if (!task) throw Error(`taskPending can't find task with id === ${id}`);
+      if (!task) throw Error(`taskPending: can't find task with id === ${id}`);
       return TASK_STATUSES.PENDING === task.status;
     },
   },
@@ -208,24 +208,21 @@ const synthesizerMachine = createMachine({
       nextTaskID: ({ nextTaskID }) => nextTaskID + 1,
     }),
 
-    setPendingStatus: assign({
+    updateTaskStatus: assign({
       queue: ({ queue }, event) => {
-        console.log('setPendingStatus', event);
+        console.log('updateTaskStatus', event);
         const { id } = event;
         const task = queue.find((t) => t.id === id);
-        if (!task) throw Error(`setPendingStatus can't find task with id === ${id}`);
-        Object.assign(task, { status: TASK_STATUSES.PENDING });
-        return queue;
-      },
-    }),
-
-    setEditingStatus: assign({
-      queue: ({ queue }, event) => {
-        console.log('setEditingStatus', event);
-        const { id } = event;
-        const task = queue.find((t) => t.id === id);
-        if (!task) throw Error(`setEditingStatus can't find task with id === ${id}`);
-        Object.assign(task, { status: TASK_STATUSES.EDITING });
+        if (!task) throw Error(`updateTaskStatus: can't find task with id === ${id}`);
+        let newStatus;
+        switch (event.type) {
+          case 'EDIT_TASK': newStatus = TASK_STATUSES.EDITING; break;
+          case 'EDIT_CANCELED': newStatus = TASK_STATUSES.PENDING; break;
+          case 'DELETE_TASK': newStatus = TASK_STATUSES.DELETION_CONFIRMATION; break;
+          case 'DELETE_CANCELED': newStatus = TASK_STATUSES.PENDING; break;
+          default: throw Error(`updateTaskStatus: unexpected event.type ${event.type}`);
+        }
+        Object.assign(task, { status: newStatus });
         return queue;
       },
     }),
@@ -235,7 +232,7 @@ const synthesizerMachine = createMachine({
         console.log('updateTask', event);
         const { id, priority, sequence } = event;
         const task = queue.find((t) => t.id === id);
-        if (!task) throw Error(`updateTask can't find task with id === ${id}`);
+        if (!task) throw Error(`updateTask: can't find task with id === ${id}`);
         Object.assign(task, { priority, sequence, status: TASK_STATUSES.PENDING });
         return queue;
       },

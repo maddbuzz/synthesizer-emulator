@@ -65,7 +65,7 @@ export default {
       if (!Object.hasOwn(currentTask, 'elementsLeft')) {
         if (state.matches('synthesizer.onMaintenance')) return ['', '🛠', ''];
         if (state.matches('synthesizer.idle')) return ['', '', '♻']; // ['♺', '♲', '♻'];
-        throw Error(`splitCurrentSequence: unknown state ${state.value}!`);
+        throw Error(`splitCurrentSequence: unexpected state ${state.value}!`);
       }
       const { sequence, length, elementsLeft } = currentTask;
       const currentIndex = length - 1 - elementsLeft;
