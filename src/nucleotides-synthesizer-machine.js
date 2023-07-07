@@ -231,7 +231,7 @@ const synthesizerMachine = createMachine({
 
     updateTaskStatus: assign({
       queue: ({ queue }, event) => {
-        console.log('updateTaskStatus', event);
+        // console.log('updateTaskStatus', event);
         const { id } = event;
         const task = queue.find((t) => t.id === id);
         if (!task) throw Error(`updateTaskStatus: can't find task with id === ${id}`);
@@ -250,7 +250,7 @@ const synthesizerMachine = createMachine({
 
     updateTask: assign({
       queue: ({ queue }, event) => {
-        console.log('updateTask', event);
+        // console.log('updateTask', event);
         const { id, priority, sequence } = event;
         const task = queue.find((t) => t.id === id);
         if (!task) throw Error(`updateTask: can't find task with id === ${id}`);
@@ -261,7 +261,7 @@ const synthesizerMachine = createMachine({
 
     destroyTask: assign({
       queue: ({ queue }, event) => {
-        console.log('destroyTask', event);
+        // console.log('destroyTask', event);
         const { id } = event;
         const index = queue.findIndex((t) => t.id === id);
         if (index === -1) throw Error(`destroyTask: can't find task with id === ${id}`);
