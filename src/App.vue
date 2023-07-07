@@ -23,7 +23,6 @@ const { state, send } = useMachine(synthesizerMachine);
     </v-app-bar>
 
     <v-main>
-      <!-- <router-view></router-view> -->
       <router-view :state="state" :send="send"></router-view>
     </v-main>
 

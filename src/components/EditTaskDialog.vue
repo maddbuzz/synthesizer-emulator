@@ -10,11 +10,12 @@ defineProps({
 
 <template>
   <div>
-    <v-dialog v-model="showDialog" width="1250">
+    <v-dialog persistent v-model="showDialog" width="1250">
 
       <template v-slot:activator="{ on, attrs }">
-        <v-btn class="blue white--text" v-bind="attrs" v-on="on">
-          edit task
+        <!-- <v-btn class="green--text" small v-bind="attrs" v-on="on"> -->
+        <v-btn small v-bind="attrs" v-on="on">
+          <v-icon>edit</v-icon>
         </v-btn>
       </template>
 

@@ -2,12 +2,13 @@
 import _debounce from 'lodash/debounce';
 import { TASK_STATUSES, PRIORITY_NAMES } from '../nucleotides-synthesizer-machine';
 import EditTaskDialog from './EditTaskDialog.vue';
+import DeleteTaskDialog from './DeleteTaskDialog.vue';
 
 defineProps({
   send: { type: Function, required: true },
   additionalHeaders: { type: Array, default: () => [] },
   tasks: { type: Array, required: true },
-  itemsPerPage: { type: Number, default: 5 },
+  itemsPerPage: Number,
 });
 </script>
 
@@ -45,8 +46,11 @@ defineProps({
           <template v-slot:item.completedAt="{ item }">
             {{ getTimeString(item.completedAt) }}
           </template>
-          <template v-slot:item.buttons="{ item }">
-            <edit-task-dialog :send="send" :taskForEdit="item" v-if="showEditButton(item)" />
+          <template v-slot:item.editButton="{ item }">
+            <edit-task-dialog :send="send" :taskForEdit="item" v-if="shouldButtonsBeShown(item)" />
+          </template>
+          <template v-slot:item.deleteButton="{ item }">
+            <delete-task-dialog :send="send" :taskID="item.id" v-if="shouldButtonsBeShown(item)" />
           </template>
         </v-data-table>
 
@@ -61,6 +65,7 @@ export default {
 
   components: {
     EditTaskDialog,
+    DeleteTaskDialog,
   },
 
   data() {
@@ -73,7 +78,7 @@ export default {
         { text: 'Created at', value: 'createdAt' },
       ].concat(this.additionalHeaders)
         .map((h) => Object.assign(h, { filter: this.customFilterFor(h.value) }))
-        .concat({ text: '', value: 'buttons', sortable: false }),
+        .concat({ value: 'editButton', sortable: false }, { value: 'deleteButton', sortable: false }),
 
       items: this.tasks,
 
@@ -151,8 +156,8 @@ export default {
       if (!timestamp) return '';
       return (new Date(timestamp)).toLocaleString('ru-RU');
     },
-    showEditButton({ status }) {
-      return status === TASK_STATUSES.PENDING || status === TASK_STATUSES.EDITING; // !!!!!!!!!!!!!!!!!!!!
+    shouldButtonsBeShown({ status }) {
+      return (status !== TASK_STATUSES.PROCESSING) && (status !== TASK_STATUSES.COMPLETED);
     },
   },
 };

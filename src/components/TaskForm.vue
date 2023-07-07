@@ -22,13 +22,13 @@ defineProps({
     <v-select v-model="priorityModel" :items="priorities" :error-messages="priorityErrors" label="Priority" required
       @change="$v.priorityModel.$touch()" @blur="$v.priorityModel.$touch()"></v-select>
 
-    <v-btn class="mr-3" @click="submit">
+    <v-btn class="blue white--text mr-3" @click="submit">
       {{ submitName }}
     </v-btn>
-    <v-btn class="mr-3" @click="randomizeTask">
+    <v-btn class="blue white--text mr-3" @click="randomizeTask">
       randomize
     </v-btn>
-    <v-btn @click="clear">
+    <v-btn  class="blue white--text" @click="clear">
       clear
     </v-btn>
   </form>

@@ -1,10 +1,8 @@
 import Vue from 'vue';
 import VueRouter from 'vue-router';
-// import HomeView from '../views/HomeView.vue';
 
 import AllTasksView from '../views/AllTasksView.vue';
 import SynthesizerView from '../views/SynthesizerView.vue';
-// import NotFound from '../components/NotFound.vue';
 
 Vue.use(VueRouter);
 
@@ -21,7 +19,6 @@ const routes = [
     component: AllTasksView,
     // props: { // },
   },
-
   {
     path: '/about',
     name: 'about',
@@ -30,7 +27,6 @@ const routes = [
     // which is lazy-loaded when the route is visited.
     component: () => import(/* webpackChunkName: "about" */ '../views/AboutView.vue'),
   },
-  // { path: '*', component: NotFound },
 ];
 
 const router = new VueRouter({

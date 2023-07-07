@@ -121,7 +121,6 @@ const synthesizerMachine = createMachine({
               // actions: [(context, event) => console.log(event)],
               target: 'taskEnqueueing',
             },
-
             EDIT_TASK: [
               {
                 target: 'taskEditing',
@@ -132,7 +131,16 @@ const synthesizerMachine = createMachine({
                 internal: false,
               },
             ],
-
+            DELETE_TASK: [
+              {
+                target: 'taskDeleting',
+                cond: 'taskPending',
+              },
+              {
+                target: 'waiting',
+                internal: false,
+              },
+            ],
           },
         },
         taskEnqueueing: {
@@ -157,6 +165,19 @@ const synthesizerMachine = createMachine({
             UPDATE_TASK: {
               target: 'sortByPriorities',
               actions: 'updateTask',
+            },
+          },
+        },
+        taskDeleting: {
+          entry: 'updateTaskStatus',
+          on: {
+            DELETE_CANCELED: {
+              target: 'sortByPriorities', // !
+              actions: 'updateTaskStatus',
+            },
+            DESTROY_TASK: {
+              target: 'waiting',
+              actions: 'destroyTask',
             },
           },
         },
@@ -238,6 +259,17 @@ const synthesizerMachine = createMachine({
       },
     }),
 
+    destroyTask: assign({
+      queue: ({ queue }, event) => {
+        console.log('destroyTask', event);
+        const { id } = event;
+        const index = queue.findIndex((t) => t.id === id);
+        if (index === -1) throw Error(`destroyTask: can't find task with id === ${id}`);
+        queue.splice(index, 1);
+        return queue;
+      },
+    }),
+
     sortTasks: assign({
       queue: ({ queue }) => {
         queue.sort((a, b) => {
@@ -286,6 +318,7 @@ const synthesizerMachine = createMachine({
 
     resetTasksCompletedInRow: assign({ tasksCompletedInRow: 0 }),
 
+    // Tasks must be sorted before calculateEstimatedTime!
     calculateEstimatedTime: assign(({ queue, tasksCompletedInRow }) => {
       if (!queue.length) return { allTasksEstimatedTime: 0 };
       if (TASKS_BEFORE_MAINTENANCE === tasksCompletedInRow) return {}; // synthesizer on maintenance
@@ -314,9 +347,6 @@ const synthesizerMachine = createMachine({
 
       return { queue, allTasksEstimatedTime: taskEstimatedTime, allTasksEndTime: taskEndTime };
     }),
-
-    // TODO:
-    // deleteTask: () => console.log('deleteTask'),
   },
 
   delays: { // can be a constant or a function: (context, event) => ...
