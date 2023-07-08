@@ -5,9 +5,10 @@ import EditTaskDialog from './EditTaskDialog.vue';
 import DeleteTaskDialog from './DeleteTaskDialog.vue';
 
 defineProps({
+  state: { type: Object, required: true },
   send: { type: Function, required: true },
   additionalHeaders: { type: Array, default: () => [] },
-  tasks: { type: Array, required: true },
+  shouldCompletedTasksBeShown: { type: Boolean, default: false },
   itemsPerPage: Number,
 });
 </script>
@@ -80,7 +81,8 @@ export default {
         .map((h) => Object.assign(h, { filter: this.customFilterFor(h.value) }))
         .concat({ value: 'editButton', sortable: false }, { value: 'deleteButton', sortable: false }),
 
-      items: this.tasks,
+      queue: this.state.context.queue,
+      completedTasks: this.state.context.completedTasks,
 
       allFilters: [
         {
@@ -96,7 +98,6 @@ export default {
           search: '', text: 'Estimated end time', value: 'taskEndTime', slotMethod: this.getTimeString,
         },
       ],
-
       selectedFilters: [],
     };
   },
@@ -109,10 +110,15 @@ export default {
             .findIndex((f) => f.value === value) === -1
         ));
     },
+
+    items() {
+      if (!this.shouldCompletedTasksBeShown) return this.queue;
+      return this.completedTasks.concat(this.queue); // shallow copy
+    },
   },
 
   created() {
-    // https://lodash.com/docs#debounce
+    // https://css-tricks.com/debouncing-throttling-explained-examples/
     this.debouncedOnInputTextField = _debounce(this.onInputTextField, 500);
   },
   methods: {

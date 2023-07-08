@@ -3,7 +3,7 @@ import _snakeCase from 'lodash/snakeCase';
 import TasksTable from '../components/TasksTable.vue';
 import AddTaskDialog from '../components/AddTaskDialog.vue';
 
-const props = defineProps({
+defineProps({
   state: { type: Object, required: true },
   send: { type: Function, required: true },
 });
@@ -11,7 +11,6 @@ const props = defineProps({
 const additionalHeaders = [
   { text: 'Estimated end time', value: 'taskEndTime' },
 ];
-const { queue } = props.state.context;
 </script>
 
 <template>
@@ -29,7 +28,7 @@ const { queue } = props.state.context;
     </v-row>
     <v-row>
       <v-col cols="12">
-        <tasks-table :send="send" :additionalHeaders="additionalHeaders" :tasks="queue" :itemsPerPage="10" />
+        <tasks-table :state="state" :send="send" :additionalHeaders="additionalHeaders" :itemsPerPage="10" />
       </v-col>
     </v-row>
   </v-container>
