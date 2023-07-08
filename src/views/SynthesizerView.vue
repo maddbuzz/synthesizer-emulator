@@ -7,10 +7,6 @@ defineProps({
   state: { type: Object, required: true },
   send: { type: Function, required: true },
 });
-
-const additionalHeaders = [
-  { text: 'Estimated end time', value: 'taskEndTime' },
-];
 </script>
 
 <template>
@@ -28,7 +24,7 @@ const additionalHeaders = [
     </v-row>
     <v-row>
       <v-col cols="12">
-        <tasks-table :state="state" :send="send" :additionalHeaders="additionalHeaders" :itemsPerPage="10" />
+        <tasks-table :state="state" :send="send" :itemsPerPage="10" />
       </v-col>
     </v-row>
   </v-container>

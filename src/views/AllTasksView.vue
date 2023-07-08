@@ -7,7 +7,6 @@ defineProps({
 });
 
 const additionalHeaders = [
-  { text: 'Estimated end time', value: 'taskEndTime' },
   { text: 'Completed at', value: 'completedAt' },
 ];
 </script>

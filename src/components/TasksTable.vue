@@ -77,6 +77,7 @@ export default {
         { text: 'Priority', value: 'priority' },
         { text: 'Sequence', value: 'sequence', sortable: false },
         { text: 'Created at', value: 'createdAt' },
+        { text: 'Estimated end time', value: 'taskEndTime' },
       ].concat(this.additionalHeaders)
         .map((h) => Object.assign(h, { filter: this.customFilterFor(h.value) }))
         .concat({ value: 'editButton', sortable: false }, { value: 'deleteButton', sortable: false }),
