@@ -15,7 +15,7 @@ const additionalHeaders = [
   <v-container fluid>
     <v-row>
       <v-col>
-        <tasks-table :state="state" :send="send" :additionalHeaders="additionalHeaders" :shouldCompletedTasksBeShown="true" :itemsPerPage="15" />
+        <tasks-table :state="state" :send="send" :additionalHeaders="additionalHeaders" shouldCompletedTasksBeShown :itemsPerPage="15" />
       </v-col>
     </v-row>
   </v-container>
