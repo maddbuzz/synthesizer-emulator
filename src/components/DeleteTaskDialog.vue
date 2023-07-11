@@ -11,7 +11,7 @@ defineProps({
   <div>
     <v-dialog persistent v-model="showDialog" width="625">
 
-      <template v-slot:activator="{ on, attrs }">
+      <template #activator="{ on, attrs }">
         <!-- <v-btn class="red--text" small v-bind="attrs" v-on="on"> -->
         <v-btn small v-bind="attrs" v-on="on">
           <v-icon>delete_forever</v-icon>

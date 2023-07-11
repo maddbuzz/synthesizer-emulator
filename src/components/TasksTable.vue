@@ -18,7 +18,7 @@ defineProps({
     <v-row>
       <v-col>
 
-        <div v-for="filter in selectedFilters" v-bind:key="filter.value">
+        <div v-for="filter in selectedFilters" :key="filter.value">
           <v-text-field :label="filter.text" @input="debouncedOnInputTextField($event, filter.value)"></v-text-field>
         </div>
 
@@ -33,24 +33,24 @@ defineProps({
       <v-col>
 
         <v-data-table :headers="headers" :items="items" :items-per-page="itemsPerPage" class="elevation-4">
-          <template v-slot:item.priority="{ item }">
+          <template #item.priority="{ item }">
             <v-chip :color="getPriorityColor(item.priority)" dark>
               {{ getPriorityName(item.priority) }}
             </v-chip>
           </template>
-          <template v-slot:item.createdAt="{ item }">
+          <template #item.createdAt="{ item }">
             {{ getTimeString(item.createdAt) }}
           </template>
-          <template v-slot:item.taskEndTime="{ item }">
+          <template #item.taskEndTime="{ item }">
             {{ getTimeString(item.taskEndTime) }}
           </template>
-          <template v-slot:item.completedAt="{ item }">
+          <template #item.completedAt="{ item }">
             {{ getTimeString(item.completedAt) }}
           </template>
-          <template v-slot:item.editButton="{ item }">
+          <template #item.editButton="{ item }">
             <edit-task-dialog :send="send" :taskForEdit="item" v-if="shouldButtonsBeShown(item)" />
           </template>
-          <template v-slot:item.deleteButton="{ item }">
+          <template #item.deleteButton="{ item }">
             <delete-task-dialog :send="send" :taskID="item.id" v-if="shouldButtonsBeShown(item)" />
           </template>
         </v-data-table>

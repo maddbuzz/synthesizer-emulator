@@ -11,7 +11,7 @@ defineProps({
   <div>
     <v-dialog v-model="showDialog" width="1250">
 
-      <template v-slot:activator="{ on, attrs }">
+      <template #activator="{ on, attrs }">
         <v-btn class="blue white--text" v-bind="attrs" v-on="on">
           add task
         </v-btn>
