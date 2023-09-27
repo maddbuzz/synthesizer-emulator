@@ -1,5 +1,7 @@
 # Test project "Synthesizer emulator"
 
+![image](https://github.com/maddbuzz/synthesizer-emulator/assets/108969548/3e3a2cea-6680-4e74-b767-78542146890c)
+
 ## Common words and logic
 The synthesis of oligonucleotides is a complex process that in a real laboratory requires tuning and calibration of a real synthesizer and depends on the hardware, software and chemicals used. As part of the test task, we propose to abstract as much as possible from reality and concentrate on only one (and the most important) parameter: the synthesized nucleotide sequence. To refresh in memory what nucleotides are and what they are, it is proposed independently. As part of the test task, we are only interested in adenine (A), thymine (T), guanine (G) and cytosine (C).
 
@@ -46,20 +48,15 @@ It is required to develop a single-page application (SPA) that emulates the oper
 
 ###  Project setup
 ```
-npm install
+make install
 ```
 
 ### Compiles and hot-reloads for development
 ```
-npm run serve
-```
-
-### Compiles and minifies for production
-```
-npm run build
+make dev
 ```
 
 ### Lints and fixes files
 ```
-npm run lint
+make lint
 ```
